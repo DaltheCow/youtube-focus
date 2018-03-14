@@ -11,15 +11,22 @@
     "persistent": false
   },
 
+  "web_accessible_resources": [
+    "not_available.html"
+  ],
+
   "content_scripts": [
     {
-      "matches": ["https://www.youtube.com*"],
+      "matches": ["https://www.youtube.com/*"],
       "js": ["content.js"]
     }
   ],
+
   "options_page": "options.html",
 
   "permissions": [
-    "storage"
+    "storage",
+    "webNavigation",
+    "tabs"
   ]
 }
