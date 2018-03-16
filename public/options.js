@@ -18273,14 +18273,13 @@ var App = function (_Component) {
 
     _this.componentDidMount = function () {
       chrome.storage.sync.get('settings', function (data) {
-        var settings = data.settings;
+        var _data$settings = data.settings,
+            allowedVideos = _data$settings.allowedVideos,
+            allowedPlaylists = _data$settings.allowedPlaylists,
+            hideRelated = _data$settings.hideRelated,
+            hideComments = _data$settings.hideComments;
 
-        if (settings) {
-          var allowedVideos = settings.allowedVideos ? settings.allowedVideos : [];
-          var allowedPlaylists = settings.allowedPlaylists ? settings.allowedPlaylists : [];
-          var hideRelated = settings.hideRelated ? settings.hideRelated : false;
-          _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated });
-        }
+        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments });
       });
     };
 
@@ -18291,7 +18290,6 @@ var App = function (_Component) {
         var settings = Object.assign({}, _this.state, { hideRelated: !hideRelated });
         chrome.storage.sync.set({ settings: settings }, function () {
           _this.setState({ hideRelated: !hideRelated });
-          console.log('hi');
         });
       }
     };

@@ -29,6 +29,6 @@
   left: calc(100% - 17px);
 }
 
-.related-toggle {
+.switch {
   display: flex;
 }

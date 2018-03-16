@@ -10,13 +10,8 @@ class App extends Component {
 
   componentDidMount = () => {
     chrome.storage.sync.get('settings', data => {
-      const { settings } = data;
-      if (settings) {
-        const allowedVideos = settings.allowedVideos ? settings.allowedVideos : [];
-        const allowedPlaylists = settings.allowedPlaylists ? settings.allowedPlaylists : [];
-        const hideRelated = settings.hideRelated ? settings.hideRelated : false;
-        this.setState({ allowedVideos, allowedPlaylists, hideRelated });
-      }
+      let { allowedVideos, allowedPlaylists, hideRelated, hideComments } = data.settings;
+      this.setState({ allowedVideos, allowedPlaylists, hideRelated, hideComments });
     });
   }
 
@@ -26,7 +21,6 @@ class App extends Component {
       const settings = Object.assign({}, this.state, { hideRelated: !hideRelated } )
       chrome.storage.sync.set({ settings }, () => {
         this.setState({ hideRelated: !hideRelated });
-        console.log('hi');
       })
     }
   }

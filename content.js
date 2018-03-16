@@ -1,23 +1,19 @@
 
 chrome.runtime.sendMessage({action: "showPageAction"});
-chrome.runtime.sendMessage({action: "getState"})
+chrome.runtime.sendMessage({action: "getState"});
 const status = { removed: false, intvl: null };
 
 
 chrome.runtime.onMessage.addListener(data => {
     switch(data.action) {
       case "watching":
-        clearOldIntvls(status);
         removeRelatedList(status);
         break;
       case "hideRelated":
         if (data.value) {
-          clearOldIntvls(status);
-          removeRelatedList(status)
-          console.log("hihi");
+          removeRelatedList(status);
         } else {
           clearOldIntvls(status);
-          console.log("hi");
           const node = document.querySelector("#related");
           node.style.display = "inline";
         }
@@ -25,6 +21,7 @@ chrome.runtime.onMessage.addListener(data => {
 });
 
 function removeRelatedList(status) {
+  clearOldIntvls(status);
   const fastIntvl = removeRelatedIntvl(100, status);
   status.intvl = fastIntvl;
   setTimeout(() => {
