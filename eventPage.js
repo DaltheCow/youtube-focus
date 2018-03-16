@@ -7,14 +7,18 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       break;
     case "getState":
       chrome.storage.sync.get("settings", function(data) {
-        hideRelated(data.settings.hideRelated);
+        sendStateToContent(data.settings.hideRelated, 'hideRelated');
+        sendStateToContent(data.settings.hideComments, 'hideComments');
       });
       break;
   }
 });
 
 chrome.storage.sync.get("settings", function(data) {
-  ensureSettings(data, () => hideRelated(data.settings.hideRelated));
+  ensureSettings(data, () => {
+    sendStateToContent(data.settings.hideRelated, 'hideRelated');
+    sendStateToContent(data.settings.hideComments, 'hideComments');
+  });
 });
 
 
@@ -46,13 +50,15 @@ chrome.tabs.query({}, function(tabs) {
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
   if (changes.settings.oldValue.hideRelated !== changes.settings.newValue.hideRelated) {
-    hideRelated(changes.settings.newValue.hideRelated);
+    sendStateToContent(changes.settings.newValue.hideRelated, 'hideRelated');
+  } else if (changes.settings.oldValue.hideComments !== changes.settings.newValue.hideComments) {
+    sendStateToContent(changes.settings.newValue.hideComments, 'hideComments');
   }
 });
 
-function hideRelated(value) {
+function sendStateToContent(value, field) {
   chrome.tabs.query({}, function(tabs) {
-    var message = { action: "hideRelated", value };
+    var message = { action: "hideField", value, field };
     Array.from(tabs)
     .forEach(tab => chrome.tabs.sendMessage(tab.id, message));
   });
