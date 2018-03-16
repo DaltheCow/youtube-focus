@@ -1,52 +1,42 @@
-
 chrome.runtime.sendMessage({action: "showPageAction"});
 chrome.runtime.sendMessage({action: "getState"});
-const status = { removed: false, intvl: null };
+const state = { intvl: null, hideRelated: false, hideComments: false };
 
 
 chrome.runtime.onMessage.addListener(data => {
     switch(data.action) {
-      case "watching":
-        removeRelatedList(status);
-        break;
-      case "hideRelated":
+      case "hideField":
+        state[data.field] = data.value;
         if (data.value) {
-          removeRelatedList(status);
+          removeNode(state);
         } else {
-          clearOldIntvls(status);
-          const node = document.querySelector("#related");
+          const id = data.field === 'hideRelated' ? 'related' : 'comments';
+          const node = document.querySelector(`#${id}`);
           node.style.display = "inline";
         }
     }
 });
 
-function removeRelatedList(status) {
-  clearOldIntvls(status);
-  const fastIntvl = removeRelatedIntvl(100, status);
-  status.intvl = fastIntvl;
+function removeNode(state) {
+  clearInterval(state.intvl);
+  const fastIntvl = removeNodeIntvl(100, state);
+  state.intvl = fastIntvl;
   setTimeout(() => {
-    if (!status.removed) {
-      clearInterval(fastIntvl);
-      status.intvl = removeRelatedIntvl(1000, status);
-    }
+    clearInterval(fastIntvl);
+    state.intvl = removeNodeIntvl(1000, state);
   }, 2000);
 }
 
-function removeRelatedIntvl(intvl, status) {
+function removeNodeIntvl(intvl, state) {
   const id = setInterval(() => {
-    const node = document.querySelector("#related");
-    if (node) {
-      status.removed = true;
-      node.style.display = "none";
-      clearInterval(id);
+    const related = document.querySelector("#related");
+    if (related && state.hideRelated) {
+      related.style.display = "none";
+    }
+    const comments = document.querySelector("#comments");
+    if (comments && state.hideComments) {
+      comments.style.display = "none";
     }
   }, intvl);
   return id;
-}
-
-function clearOldIntvls(status) {
-  if (!status.removed) {
-    clearInterval(status.intvl);
-    status.removed = false;
-  }
 }

@@ -33,7 +33,13 @@ chrome.storage.sync.get("settings", function(data) {
         lastURL = e.url;
         chrome.storage.sync.get("settings", function(data) {
           chrome.tabs.sendMessage( e.tabId,
-                                 {action: "hideRelated", value: data.settings.hideRelated } );
+                                 { action: "hideField",
+                                   value: data.settings.hideRelated,
+                                   field: 'hideRelated' } );
+          chrome.tabs.sendMessage( e.tabId,
+                                 { action: "hideField",
+                                   value: data.settings.hideComments,
+                                   field: 'hideComments' } );
         });
       }
     }, { url: [{hostSuffix: "youtube.com", pathPrefix: "/watch"}]}
