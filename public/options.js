@@ -18257,6 +18257,8 @@ var _reactDom = __webpack_require__(17);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
+function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
+
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
@@ -18279,43 +18281,74 @@ var App = function (_Component) {
             hideRelated = _data$settings.hideRelated,
             hideComments = _data$settings.hideComments;
 
-        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments });
+        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments, loaded: true });
       });
     };
 
-    _this.toggleRelated = function () {
-      var hideRelated = _this.state.hideRelated;
-
-      if (_this.state.hideRelated !== null) {
-        var settings = Object.assign({}, _this.state, { hideRelated: !hideRelated });
-        chrome.storage.sync.set({ settings: settings }, function () {
-          _this.setState({ hideRelated: !hideRelated });
-        });
-      }
+    _this.toggle = function (field_name) {
+      var field = _this.state[field_name];
+      var settings = Object.assign({}, _this.state, _defineProperty({}, field_name, !field));
+      chrome.storage.sync.set({ settings: settings }, function () {
+        _this.setState(_defineProperty({}, field_name, !field));
+      });
     };
 
     _this.render = function () {
-      var checked = _this.state.hideRelated;
+      var _this$state = _this.state,
+          allowedVideos = _this$state.allowedVideos,
+          allowedPlaylists = _this$state.allowedPlaylists,
+          hideRelated = _this$state.hideRelated,
+          hideComments = _this$state.hideComments,
+          loaded = _this$state.loaded;
+
       return _react2.default.createElement(
         'div',
         null,
-        _react2.default.createElement(
+        !loaded ? null : _react2.default.createElement(
           'div',
           null,
-          'Related Videos:',
           _react2.default.createElement(
             'div',
-            { className: 'related-toggle' },
+            null,
+            'Related Videos:',
             _react2.default.createElement(
               'div',
-              null,
-              'SHOW'
-            ),
-            _react2.default.createElement('div', { onClick: _this.toggleRelated, className: 'switcher_slider' + (checked ? " checked" : "") }),
+              { className: 'switch' },
+              _react2.default.createElement(
+                'div',
+                null,
+                'SHOW'
+              ),
+              _react2.default.createElement('div', { onClick: function onClick() {
+                  return _this.toggle('hideRelated');
+                }, className: 'switcher_slider' + (hideRelated ? " checked" : "") }),
+              _react2.default.createElement(
+                'div',
+                null,
+                'HIDE'
+              )
+            )
+          ),
+          _react2.default.createElement(
+            'div',
+            null,
+            'Comments:',
             _react2.default.createElement(
               'div',
-              null,
-              'HIDE'
+              { className: 'switch' },
+              _react2.default.createElement(
+                'div',
+                null,
+                'SHOW'
+              ),
+              _react2.default.createElement('div', { onClick: function onClick() {
+                  return _this.toggle('hideComments');
+                }, className: 'switcher_slider' + (hideComments ? " checked" : "") }),
+              _react2.default.createElement(
+                'div',
+                null,
+                'HIDE'
+              )
             )
           ),
           _react2.default.createElement('div', { className: 'video_list' })
@@ -18323,7 +18356,7 @@ var App = function (_Component) {
       );
     };
 
-    _this.state = { hideRelated: null, allowedVideos: [], allowedPlaylists: [] };
+    _this.state = { loaded: false };
     return _this;
   }
 
