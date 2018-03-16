@@ -1,12 +1,26 @@
-chrome.runtime.sendMessage({todo: "showPageAction"});
 
+chrome.runtime.sendMessage({action: "showPageAction"});
+chrome.runtime.sendMessage({action: "getState"})
 const status = { removed: false, intvl: null };
-removeRelatedList(status);
+
 
 chrome.runtime.onMessage.addListener(data => {
-    if (data.action === "watching") {
-      clearOldIntvls(status);
-      removeRelatedList(status);
+    switch(data.action) {
+      case "watching":
+        clearOldIntvls(status);
+        removeRelatedList(status);
+        break;
+      case "hideRelated":
+        if (data.value) {
+          clearOldIntvls(status);
+          removeRelatedList(status)
+          console.log("hihi");
+        } else {
+          clearOldIntvls(status);
+          console.log("hi");
+          const node = document.querySelector("#related");
+          node.style.display = "inline";
+        }
     }
 });
 
@@ -26,9 +40,7 @@ function removeRelatedIntvl(intvl, status) {
     const node = document.querySelector("#related");
     if (node) {
       status.removed = true;
-      while (node.hasChildNodes()) {
-        node.removeChild(node.lastChild);
-      }
+      node.style.display = "none";
       clearInterval(id);
     }
   }, intvl);

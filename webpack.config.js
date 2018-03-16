@@ -1,14 +1,17 @@
 const { resolve } = require('path');
 
 module.exports = {
-  entry: ['./src/index.js'],
+  entry: {
+    popup: './popup/index.jsx',
+    options: './options/index.jsx'
+  },
   output: {
     path: resolve('./public'),
-    filename: 'bundle.js'
+    filename: '[name].js'
   },
   module: {
     loaders: [
-      { test: /\.js$/, loaders: ['babel-loader'], exclude: /node_modules/ }
+      { test: /\.jsx$/, loaders: ['babel-loader'], exclude: /node_modules/ }
     ]
   }
 };

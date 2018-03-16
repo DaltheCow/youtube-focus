@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 14);
+/******/ 	return __webpack_require__(__webpack_require__.s = 27);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -424,9 +424,9 @@ module.exports = emptyObject;
 /* WEBPACK VAR INJECTION */(function(process) {
 
 if (process.env.NODE_ENV === 'production') {
-  module.exports = __webpack_require__(16);
+  module.exports = __webpack_require__(14);
 } else {
-  module.exports = __webpack_require__(17);
+  module.exports = __webpack_require__(15);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
@@ -577,7 +577,7 @@ module.exports = warning;
 if (process.env.NODE_ENV !== 'production') {
   var invariant = __webpack_require__(5);
   var warning = __webpack_require__(6);
-  var ReactPropTypesSecret = __webpack_require__(18);
+  var ReactPropTypesSecret = __webpack_require__(16);
   var loggedTypeFailures = {};
 }
 
@@ -876,7 +876,7 @@ module.exports = shallowEqual;
  * 
  */
 
-var isTextNode = __webpack_require__(21);
+var isTextNode = __webpack_require__(19);
 
 /*eslint-disable no-bitwise */
 
@@ -937,62 +937,6 @@ module.exports = focusNode;
 /* 14 */
 /***/ (function(module, exports, __webpack_require__) {
 
-module.exports = __webpack_require__(15);
-
-
-/***/ }),
-/* 15 */
-/***/ (function(module, exports, __webpack_require__) {
-
-"use strict";
-
-
-var _react = __webpack_require__(4);
-
-var _react2 = _interopRequireDefault(_react);
-
-var _reactDom = __webpack_require__(19);
-
-function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
-
-function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var App = function (_Component) {
-  _inherits(App, _Component);
-
-  function App() {
-    var _ref;
-
-    var _temp, _this, _ret;
-
-    _classCallCheck(this, App);
-
-    for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
-      args[_key] = arguments[_key];
-    }
-
-    return _ret = (_temp = (_this = _possibleConstructorReturn(this, (_ref = App.__proto__ || Object.getPrototypeOf(App)).call.apply(_ref, [this].concat(args))), _this), _this.render = function () {
-      return _react2.default.createElement(
-        'div',
-        null,
-        'Hey'
-      );
-    }, _temp), _possibleConstructorReturn(_this, _ret);
-  }
-
-  return App;
-}(_react.Component);
-
-(0, _reactDom.render)(_react2.default.createElement(App, null), document.getElementById('root'));
-
-/***/ }),
-/* 16 */
-/***/ (function(module, exports, __webpack_require__) {
-
 "use strict";
 /** @license React v16.2.0
  * react.production.min.js
@@ -1018,7 +962,7 @@ isValidElement:K,version:"16.2.0",__SECRET_INTERNALS_DO_NOT_USE_OR_YOU_WILL_BE_F
 
 
 /***/ }),
-/* 17 */
+/* 15 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2383,7 +2327,7 @@ module.exports = react;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 18 */
+/* 16 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2402,7 +2346,7 @@ module.exports = ReactPropTypesSecret;
 
 
 /***/ }),
-/* 19 */
+/* 17 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2440,15 +2384,15 @@ if (process.env.NODE_ENV === 'production') {
   // DCE check should happen before ReactDOM bundle executes so that
   // DevTools can report bad minification during injection.
   checkDCE();
-  module.exports = __webpack_require__(20);
+  module.exports = __webpack_require__(18);
 } else {
-  module.exports = __webpack_require__(23);
+  module.exports = __webpack_require__(21);
 }
 
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 20 */
+/* 18 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2684,7 +2628,7 @@ Z.injectIntoDevTools({findFiberByHostInstance:pb,bundleType:0,version:"16.2.0",r
 
 
 /***/ }),
-/* 21 */
+/* 19 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2699,7 +2643,7 @@ Z.injectIntoDevTools({findFiberByHostInstance:pb,bundleType:0,version:"16.2.0",r
  * @typechecks
  */
 
-var isNode = __webpack_require__(22);
+var isNode = __webpack_require__(20);
 
 /**
  * @param {*} object The object to check.
@@ -2712,7 +2656,7 @@ function isTextNode(object) {
 module.exports = isTextNode;
 
 /***/ }),
-/* 22 */
+/* 20 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2740,7 +2684,7 @@ function isNode(object) {
 module.exports = isNode;
 
 /***/ }),
-/* 23 */
+/* 21 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -2774,8 +2718,8 @@ var containsNode = __webpack_require__(12);
 var focusNode = __webpack_require__(13);
 var emptyObject = __webpack_require__(3);
 var checkPropTypes = __webpack_require__(7);
-var hyphenateStyleName = __webpack_require__(24);
-var camelizeStyleName = __webpack_require__(26);
+var hyphenateStyleName = __webpack_require__(22);
+var camelizeStyleName = __webpack_require__(24);
 
 /**
  * WARNING: DO NOT manually require this module.
@@ -18142,7 +18086,7 @@ module.exports = reactDom;
 /* WEBPACK VAR INJECTION */}.call(exports, __webpack_require__(0)))
 
 /***/ }),
-/* 24 */
+/* 22 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18157,7 +18101,7 @@ module.exports = reactDom;
 
 
 
-var hyphenate = __webpack_require__(25);
+var hyphenate = __webpack_require__(23);
 
 var msPattern = /^ms-/;
 
@@ -18184,7 +18128,7 @@ function hyphenateStyleName(string) {
 module.exports = hyphenateStyleName;
 
 /***/ }),
-/* 25 */
+/* 23 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18220,7 +18164,7 @@ function hyphenate(string) {
 module.exports = hyphenate;
 
 /***/ }),
-/* 26 */
+/* 24 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18235,7 +18179,7 @@ module.exports = hyphenate;
 
 
 
-var camelize = __webpack_require__(27);
+var camelize = __webpack_require__(25);
 
 var msPattern = /^-ms-/;
 
@@ -18263,7 +18207,7 @@ function camelizeStyleName(string) {
 module.exports = camelizeStyleName;
 
 /***/ }),
-/* 27 */
+/* 25 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18296,6 +18240,99 @@ function camelize(string) {
 }
 
 module.exports = camelize;
+
+/***/ }),
+/* 26 */,
+/* 27 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var _react = __webpack_require__(4);
+
+var _react2 = _interopRequireDefault(_react);
+
+var _reactDom = __webpack_require__(17);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var App = function (_Component) {
+  _inherits(App, _Component);
+
+  function App(props) {
+    _classCallCheck(this, App);
+
+    var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
+
+    _this.componentDidMount = function () {
+      chrome.storage.sync.get('settings', function (data) {
+        var settings = data.settings;
+
+        if (settings) {
+          var allowedVideos = settings.allowedVideos ? settings.allowedVideos : [];
+          var allowedPlaylists = settings.allowedPlaylists ? settings.allowedPlaylists : [];
+          var hideRelated = settings.hideRelated ? settings.hideRelated : false;
+          _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated });
+        }
+      });
+    };
+
+    _this.toggleRelated = function () {
+      var hideRelated = _this.state.hideRelated;
+
+      if (_this.state.hideRelated !== null) {
+        var settings = Object.assign({}, _this.state, { hideRelated: !hideRelated });
+        chrome.storage.sync.set({ settings: settings }, function () {
+          _this.setState({ hideRelated: !hideRelated });
+          console.log('hi');
+        });
+      }
+    };
+
+    _this.render = function () {
+      var checked = _this.state.hideRelated;
+      return _react2.default.createElement(
+        'div',
+        null,
+        _react2.default.createElement(
+          'div',
+          null,
+          'Related Videos:',
+          _react2.default.createElement(
+            'div',
+            { className: 'related-toggle' },
+            _react2.default.createElement(
+              'div',
+              null,
+              'SHOW'
+            ),
+            _react2.default.createElement('div', { onClick: _this.toggleRelated, className: 'switcher_slider' + (checked ? " checked" : "") }),
+            _react2.default.createElement(
+              'div',
+              null,
+              'HIDE'
+            )
+          ),
+          _react2.default.createElement('div', { className: 'video_list' })
+        )
+      );
+    };
+
+    _this.state = { hideRelated: null, allowedVideos: [], allowedPlaylists: [] };
+    return _this;
+  }
+
+  return App;
+}(_react.Component);
+
+(0, _reactDom.render)(_react2.default.createElement(App, null), document.getElementById('root'));
 
 /***/ })
 /******/ ]);
