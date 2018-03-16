@@ -2,39 +2,52 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 
 const vidOrPL = (url) => {
-  // "https://www.youtube.com/watch?v=C3xihL88JHw"
-  // "https://www.youtube.com/playlist?list=PLXsTYn-i7cbcb3Usvt9o8uxLQTV3g8hun"
-  // "https://www.youtube.com/watch?v=JythPfPjJcQ&list=PLXsTYn-i7cbcb3Usvt9o8uxLQTV3g8hun"
-  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=)?(watch\?v=([A-Za-z0-9_-]{11})?)?(&list=(.+)?)?/
+  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&list=(.+)?)?/;
   const res = url.match(regex);
+  return { isPL: Boolean(res[1] || res[5]),
+           PlID: res[2] || res[6],
+           isVid: Boolean((res[3] && res[4])),
+           vidID: res[4] };
 }
 
 class App extends Component {
   constructor(props) {
     super(props);
-
-    this.state = { hideRelated: null, allowedVideos: [], allowedPlaylists: [] }
+    const { isPL, PlID, isVid, vidID } = vidOrPL(window.location.href);
+    this.isPL = isPL;
+    this.PlID = PlID;
+    this.isVid = isVid;
+    this.vidID = vidID;
+    this.state = { loaded: false };
   }
 
   componentDidMount = () => {
     chrome.storage.sync.get('settings', data => {
-      const { settings } = data;
-      if (settings) {
-        const allowedVideos = settings.allowedVideos ? settings.allowedVideos : [];
-        const allowedPlaylists = settings.allowedPlaylists ? settings.allowedPlaylists : [];
-        this.setState({ allowedVideos, allowedPlaylists });
-      }
+      let { allowedVideos, allowedPlaylists, hideRelated, hideComments } = data.settings;
+      this.setState({ allowedVideos, allowedPlaylists, hideRelated, hideComments, loaded: true });
     });
   }
 
   addVidPL = () => {
-    const urlType = vidOrPL(window.location.href);
+    let { allowedVideos, allowedPlaylists, hideRelated, hideComments, isPL, PlID, isVid, vidID } = this.state;
+    if (isPL && !allowedPlaylists.includes(PlID)) {
+      allowedPlaylists = allowedPlaylists.concat(PlID);
+    }
+    if (!isPL && isVid && !allowedVideos.includes(vidID)) {
+      allowedVideos = allowedVideos.concat(vidID);
+    }
+    if (isPL || isVid) {
+      const settings = { allowedVideos, allowedPlaylists, hideRelated, hideComments };
+      chrome.storage.sync.set(settings);
+    }
   }
 
   render = () => {
+    const { isPL, isVid } = this;
+    const btnTxt = ( isPL || isVid ? ( isPL ? "Playlist" : "Video" ) : null )
     return (
       <div>
-        <button>Add Video/Playlist</button>
+        { !btnTxt ? null : <button>{ btnTxt }</button> }
       </div>
     );
   }

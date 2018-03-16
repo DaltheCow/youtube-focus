@@ -6,13 +6,16 @@ const state = { intvl: null, hideRelated: false, hideComments: false };
 chrome.runtime.onMessage.addListener(data => {
     switch(data.action) {
       case "hideField":
-        state[data.field] = data.value;
-        if (data.value) {
-          removeNode(state);
-        } else {
-          const id = data.field === 'hideRelated' ? 'related' : 'comments';
-          const node = document.querySelector(`#${id}`);
-          node.style.display = "inline";
+      const regex = /https:\/\/www.youtube.com\/watch*/;
+        if (regex.test(location.href)) {
+          state[data.field] = data.value;
+          if (data.value) {
+            removeNode(state);
+          } else {
+            const id = data.field === 'hideRelated' ? 'related' : 'comments';
+            const node = document.querySelector(`#${id}`);
+            node.style.display = "inline";
+          }
         }
     }
 });

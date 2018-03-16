@@ -18263,11 +18263,12 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
 var vidOrPL = function vidOrPL(url) {
-  // "https://www.youtube.com/watch?v=C3xihL88JHw"
-  // "https://www.youtube.com/playlist?list=PLXsTYn-i7cbcb3Usvt9o8uxLQTV3g8hun"
-  // "https://www.youtube.com/watch?v=JythPfPjJcQ&list=PLXsTYn-i7cbcb3Usvt9o8uxLQTV3g8hun"
-  var regex = /https:\/\/www\.youtube\.com\/(playlist\?list=)?(watch\?v=([A-Za-z0-9_-]{11})?)?(&list=(.+)?)?/;
+  var regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&list=(.+)?)?/;
   var res = url.match(regex);
+  return { isPL: Boolean(res[1] || res[5]),
+    PlID: res[2] || res[6],
+    isVid: Boolean(res[3] && res[4]),
+    vidID: res[4] };
 };
 
 var App = function (_Component) {
@@ -18278,40 +18279,79 @@ var App = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
-    _this.componentDidMount = function () {
-      chrome.storage.sync.get('settings', function (data) {
-        var settings = data.settings;
+    _initialiseProps.call(_this);
 
-        if (settings) {
-          var allowedVideos = settings.allowedVideos ? settings.allowedVideos : [];
-          var allowedPlaylists = settings.allowedPlaylists ? settings.allowedPlaylists : [];
-          _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists });
-        }
-      });
-    };
+    var _vidOrPL = vidOrPL(window.location.href),
+        isPL = _vidOrPL.isPL,
+        PlID = _vidOrPL.PlID,
+        isVid = _vidOrPL.isVid,
+        vidID = _vidOrPL.vidID;
 
-    _this.addVidPL = function () {
-      var urlType = vidOrPL(window.location.href);
-    };
-
-    _this.render = function () {
-      return _react2.default.createElement(
-        'div',
-        null,
-        _react2.default.createElement(
-          'button',
-          null,
-          'Add Video/Playlist'
-        )
-      );
-    };
-
-    _this.state = { hideRelated: null, allowedVideos: [], allowedPlaylists: [] };
+    _this.isPL = isPL;
+    _this.PlID = PlID;
+    _this.isVid = isVid;
+    _this.vidID = vidID;
+    _this.state = { loaded: false };
     return _this;
   }
 
   return App;
 }(_react.Component);
+
+var _initialiseProps = function _initialiseProps() {
+  var _this2 = this;
+
+  this.componentDidMount = function () {
+    chrome.storage.sync.get('settings', function (data) {
+      var _data$settings = data.settings,
+          allowedVideos = _data$settings.allowedVideos,
+          allowedPlaylists = _data$settings.allowedPlaylists,
+          hideRelated = _data$settings.hideRelated,
+          hideComments = _data$settings.hideComments;
+
+      _this2.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments, loaded: true });
+    });
+  };
+
+  this.addVidPL = function () {
+    var _state = _this2.state,
+        allowedVideos = _state.allowedVideos,
+        allowedPlaylists = _state.allowedPlaylists,
+        hideRelated = _state.hideRelated,
+        hideComments = _state.hideComments,
+        isPL = _state.isPL,
+        PlID = _state.PlID,
+        isVid = _state.isVid,
+        vidID = _state.vidID;
+
+    if (isPL && !allowedPlaylists.includes(PlID)) {
+      allowedPlaylists = allowedPlaylists.concat(PlID);
+    }
+    if (!isPL && isVid && !allowedVideos.includes(vidID)) {
+      allowedVideos = allowedVideos.concat(vidID);
+    }
+    if (isPL || isVid) {
+      var settings = { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments };
+      chrome.storage.sync.set(settings);
+    }
+  };
+
+  this.render = function () {
+    var isPL = _this2.isPL,
+        isVid = _this2.isVid;
+
+    var btnTxt = isPL || isVid ? isPL ? "Playlist" : "Video" : null;
+    return _react2.default.createElement(
+      'div',
+      null,
+      !btnTxt ? null : _react2.default.createElement(
+        'button',
+        null,
+        btnTxt
+      )
+    );
+  };
+};
 
 (0, _reactDom.render)(_react2.default.createElement(App, null), document.getElementById('root'));
 

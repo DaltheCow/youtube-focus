@@ -14,6 +14,13 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
 });
 
+chrome.tabs.query({}, function(tabs) {
+  const regex = /https:\/\/www.youtube.com\/*/;
+  const ytTabs = Array.from(tabs)
+  .filter(tab => regex.test(tab.url));
+  ytTabs.forEach(tab => chrome.pageAction.show(tab.id));
+});
+
 chrome.storage.sync.get("settings", function(data) {
   ensureSettings(data, () => {
     sendStateToContent(data.settings.hideRelated, 'hideRelated');
@@ -21,12 +28,9 @@ chrome.storage.sync.get("settings", function(data) {
   });
 });
 
-
-
 (function() {
   let lastURL = "";
-  chrome.webNavigation.onHistoryStateUpdated.addListener(
-    function(e) {
+  chrome.webNavigation.onHistoryStateUpdated.addListener(function(e) {
       const regex = /https:\/\/www.youtube.com\/*/;
       const urlChange = e.url === "" || (regex.test(e.url) && e.url !== lastURL);
       if (urlChange) {
@@ -47,12 +51,6 @@ chrome.storage.sync.get("settings", function(data) {
 })();
 
 
-chrome.tabs.query({}, function(tabs) {
-  const regex = /https:\/\/www.youtube.com\/*/;
-  const ytTabs = Array.from(tabs)
-  .filter(tab => regex.test(tab.url));
-  ytTabs.forEach(tab => chrome.pageAction.show(tab.id));
-});
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
   if (changes.settings.oldValue.hideRelated !== changes.settings.newValue.hideRelated) {
