@@ -1,0 +1,11 @@
+.hide-comments #comments {
+  display: none !important;
+}
+
+.hide-related #related {
+  display: none !important;
+}
+
+.hide-end-screen .html5-endscreen {
+  display: none !important;
+}

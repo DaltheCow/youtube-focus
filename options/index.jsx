@@ -10,8 +10,17 @@ class App extends Component {
 
   componentDidMount = () => {
     chrome.storage.sync.get('settings', data => {
-      let { allowedVideos, allowedPlaylists, hideRelated, hideComments } = data.settings;
-      this.setState({ allowedVideos, allowedPlaylists, hideRelated, hideComments, loaded: true });
+      let { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen } = data.settings;
+      this.setState({ allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, loaded: true });
+    });
+    chrome.storage.onChanged.addListener(function(changes, namespace) {
+      if (changes.settings.oldValue.hideRelated !== changes.settings.newValue.hideRelated) {
+        sendStateToContent(changes.settings.newValue.hideRelated, 'hideRelated');
+      } else if (changes.settings.oldValue.hideComments !== changes.settings.newValue.hideComments) {
+        sendStateToContent(changes.settings.newValue.hideComments, 'hideComments');
+      } else if (changes.settings.oldValue.hideEndScreen !== changes.settings.newValue.hideEndScreen) {
+        sendStateToContent(changes.settings.newValue.hideEndScreen, 'hideEndScreen');
+      }
     });
   }
 
@@ -24,7 +33,7 @@ class App extends Component {
   }
 
   render = () => {
-    const { allowedVideos, allowedPlaylists, hideRelated, hideComments, loaded } = this.state;
+    const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, loaded } = this.state;
     return (
       <div>
         { !loaded ? null : <div>
@@ -42,6 +51,15 @@ class App extends Component {
             <div className="switch">
               <div>SHOW</div>
               <div onClick={ () => this.toggle('hideComments') } className={`switcher_slider${hideComments ? " checked" : ""}`}></div>
+              <div>HIDE</div>
+            </div>
+          </div>
+
+          <div className="switch-container">
+            End Screen Videos:
+            <div className="switch">
+              <div>SHOW</div>
+              <div onClick={ () => this.toggle('hideEndScreen') } className={`switcher_slider${hideEndScreen ? " checked" : ""}`}></div>
               <div>HIDE</div>
             </div>
           </div>

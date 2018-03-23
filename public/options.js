@@ -18279,9 +18279,19 @@ var App = function (_Component) {
             allowedVideos = _data$settings.allowedVideos,
             allowedPlaylists = _data$settings.allowedPlaylists,
             hideRelated = _data$settings.hideRelated,
-            hideComments = _data$settings.hideComments;
+            hideComments = _data$settings.hideComments,
+            hideEndScreen = _data$settings.hideEndScreen;
 
-        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments, loaded: true });
+        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, loaded: true });
+      });
+      chrome.storage.onChanged.addListener(function (changes, namespace) {
+        if (changes.settings.oldValue.hideRelated !== changes.settings.newValue.hideRelated) {
+          sendStateToContent(changes.settings.newValue.hideRelated, 'hideRelated');
+        } else if (changes.settings.oldValue.hideComments !== changes.settings.newValue.hideComments) {
+          sendStateToContent(changes.settings.newValue.hideComments, 'hideComments');
+        } else if (changes.settings.oldValue.hideEndScreen !== changes.settings.newValue.hideEndScreen) {
+          sendStateToContent(changes.settings.newValue.hideEndScreen, 'hideEndScreen');
+        }
       });
     };
 
@@ -18299,6 +18309,7 @@ var App = function (_Component) {
           allowedPlaylists = _this$state.allowedPlaylists,
           hideRelated = _this$state.hideRelated,
           hideComments = _this$state.hideComments,
+          hideEndScreen = _this$state.hideEndScreen,
           loaded = _this$state.loaded;
 
       return _react2.default.createElement(
@@ -18344,6 +18355,28 @@ var App = function (_Component) {
               _react2.default.createElement('div', { onClick: function onClick() {
                   return _this.toggle('hideComments');
                 }, className: 'switcher_slider' + (hideComments ? " checked" : "") }),
+              _react2.default.createElement(
+                'div',
+                null,
+                'HIDE'
+              )
+            )
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'switch-container' },
+            'End Screen Videos:',
+            _react2.default.createElement(
+              'div',
+              { className: 'switch' },
+              _react2.default.createElement(
+                'div',
+                null,
+                'SHOW'
+              ),
+              _react2.default.createElement('div', { onClick: function onClick() {
+                  return _this.toggle('hideEndScreen');
+                }, className: 'switcher_slider' + (hideEndScreen ? " checked" : "") }),
               _react2.default.createElement(
                 'div',
                 null,

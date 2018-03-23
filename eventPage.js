@@ -9,6 +9,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       chrome.storage.sync.get("settings", function(data) {
         sendStateToContent(data.settings.hideRelated, 'hideRelated');
         sendStateToContent(data.settings.hideComments, 'hideComments');
+        sendStateToContent(data.settings.hideEndScreen, 'hideEndScreen');
       });
       break;
   }
@@ -25,6 +26,7 @@ chrome.storage.sync.get("settings", function(data) {
   ensureSettings(data, () => {
     sendStateToContent(data.settings.hideRelated, 'hideRelated');
     sendStateToContent(data.settings.hideComments, 'hideComments');
+    sendStateToContent(data.settings.hideEndScreen, 'hideEndScreen');
   });
 });
 
@@ -44,13 +46,17 @@ chrome.storage.sync.get("settings", function(data) {
                                  { action: "hideField",
                                    value: data.settings.hideComments,
                                    field: 'hideComments' } );
+          chrome.tabs.sendMessage( e.tabId,
+                                 { action: "hideField",
+                                   value: data.settings.hideEndScreen,
+                                   field: 'hideEndScreen' } );
         });
       }
     }, { url: [{hostSuffix: "youtube.com", pathPrefix: "/watch"}]}
   );
 })();
 
-chrome.storage.sync.get('allowedVideos', data => alert(data.allowedVideos))
+// chrome.storage.sync.get('allowedVideos', data => alert(data.allowedVideos))
 // chrome.storage.sync.remove('allowedVideos');
 
 
@@ -59,6 +65,8 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
     sendStateToContent(changes.settings.newValue.hideRelated, 'hideRelated');
   } else if (changes.settings.oldValue.hideComments !== changes.settings.newValue.hideComments) {
     sendStateToContent(changes.settings.newValue.hideComments, 'hideComments');
+  } else if (changes.settings.oldValue.hideEndScreen !== changes.settings.newValue.hideEndScreen) {
+    sendStateToContent(changes.settings.newValue.hideEndScreen, 'hideEndScreen');
   }
 });
 
@@ -71,12 +79,13 @@ function sendStateToContent(value, field) {
 }
 
 function ensureSettings(data, callback) {
-  let { hideRelated, hideComments, allowedVideos, allowedPlaylists } = data.settings;
+  let { hideRelated, hideComments, hideEndScreen, allowedVideos, allowedPlaylists } = data.settings;
   hideRelated = Boolean(hideRelated);
   hideComments = Boolean(hideComments);
+  hideEndScreen = Boolean(hideEndScreen);
   allowedVideos = allowedVideos === undefined ? [] : allowedVideos;
   allowedPlaylists = allowedPlaylists === undefined ? [] : allowedPlaylists;
-  const settings = { hideRelated, hideComments, allowedVideos, allowedPlaylists };
+  const settings = { hideRelated, hideComments, hideEndScreen, allowedVideos, allowedPlaylists };
   chrome.storage.sync.set( { settings }, () => {
     callback();
   });
