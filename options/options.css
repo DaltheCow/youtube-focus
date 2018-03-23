@@ -32,3 +32,11 @@
 .switch {
   display: flex;
 }
+
+.switch-container {
+  margin: 20px;
+}
+
+.link-list {
+  margin: 20px;
+}

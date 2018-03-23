@@ -5,7 +5,7 @@ class App extends Component {
   constructor(props) {
     super(props);
 
-    this.state = { loaded: false }
+    this.state = { loaded: false };
   }
 
   componentDidMount = () => {
@@ -28,7 +28,7 @@ class App extends Component {
     return (
       <div>
         { !loaded ? null : <div>
-          <div>
+          <div className="switch-container">
             Related Videos:
             <div className="switch">
               <div>SHOW</div>
@@ -37,7 +37,7 @@ class App extends Component {
             </div>
           </div>
 
-          <div>
+          <div className="switch-container">
             Comments:
             <div className="switch">
               <div>SHOW</div>
@@ -45,7 +45,17 @@ class App extends Component {
               <div>HIDE</div>
             </div>
           </div>
-          <div className="video_list">
+          <div className="link-list">
+            { allowedVideos.map(vidId => {
+              const link = `https://www.youtube.com/watch?v=${vidId}`;
+              return <a href={ link }>{ link }</a>
+            }) }
+          </div>
+          <div className="link-list">
+            { allowedPlaylists.map(PlID => {
+              const link = `https://www.youtube.com/playlist?list=${PlID}`;
+              return <a href={ link }>{ link }</a>
+            }) }
           </div>
         </div>}
       </div>

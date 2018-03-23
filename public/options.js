@@ -18309,7 +18309,7 @@ var App = function (_Component) {
           null,
           _react2.default.createElement(
             'div',
-            null,
+            { className: 'switch-container' },
             'Related Videos:',
             _react2.default.createElement(
               'div',
@@ -18331,7 +18331,7 @@ var App = function (_Component) {
           ),
           _react2.default.createElement(
             'div',
-            null,
+            { className: 'switch-container' },
             'Comments:',
             _react2.default.createElement(
               'div',
@@ -18351,7 +18351,30 @@ var App = function (_Component) {
               )
             )
           ),
-          _react2.default.createElement('div', { className: 'video_list' })
+          _react2.default.createElement(
+            'div',
+            { className: 'link-list' },
+            allowedVideos.map(function (vidId) {
+              var link = 'https://www.youtube.com/watch?v=' + vidId;
+              return _react2.default.createElement(
+                'a',
+                { href: link },
+                link
+              );
+            })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'link-list' },
+            allowedPlaylists.map(function (PlID) {
+              var link = 'https://www.youtube.com/playlist?list=' + PlID;
+              return _react2.default.createElement(
+                'a',
+                { href: link },
+                link
+              );
+            })
+          )
         )
       );
     };

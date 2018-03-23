@@ -50,6 +50,8 @@ chrome.storage.sync.get("settings", function(data) {
   );
 })();
 
+chrome.storage.sync.get('allowedVideos', data => alert(data.allowedVideos))
+// chrome.storage.sync.remove('allowedVideos');
 
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
