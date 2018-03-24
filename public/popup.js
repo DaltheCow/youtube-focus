@@ -18282,41 +18282,39 @@ var App = function (_Component) {
     var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
     _this.addVidPL = function () {
-      var _this$state = _this.state,
-          allowedVideos = _this$state.allowedVideos,
-          allowedPlaylists = _this$state.allowedPlaylists,
-          hideRelated = _this$state.hideRelated,
-          hideComments = _this$state.hideComments;
-      var isPL = _this.isPL,
-          PlID = _this.PlID,
-          isVid = _this.isVid,
-          vidID = _this.vidID;
+      chrome.storage.sync.get('settings', function (data) {
+        var _data$settings = data.settings,
+            allowedVideos = _data$settings.allowedVideos,
+            allowedPlaylists = _data$settings.allowedPlaylists;
+        var isPL = _this.isPL,
+            PlID = _this.PlID,
+            isVid = _this.isVid,
+            vidID = _this.vidID;
 
 
-      if (isPL && !allowedPlaylists.includes(PlID)) {
-        allowedPlaylists = allowedPlaylists.concat(PlID);
-      }
-      if (!isPL && isVid && !allowedVideos.includes(vidID)) {
-        allowedVideos = allowedVideos.concat(vidID);
-      }
-      if (isPL || isVid) {
-        var settings = { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments };
-        chrome.storage.sync.set({ settings: settings });
-      }
+        if (isPL && !allowedPlaylists.includes(PlID)) {
+          allowedPlaylists = allowedPlaylists.concat(PlID);
+        }
+        if (!isPL && isVid && !allowedVideos.includes(vidID)) {
+          allowedVideos = allowedVideos.concat(vidID);
+        }
+        if (isPL || isVid) {
+          var settings = Object.assign({}, data.settings, { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists });
+          chrome.storage.sync.set({ settings: settings });
+        }
+      });
     };
 
     _this.render = function () {
       var isPL = _this.isPL,
           isVid = _this.isVid;
-      var _this$state2 = _this.state,
-          urlLoaded = _this$state2.urlLoaded,
-          stateLoaded = _this$state2.stateLoaded;
+      var urlLoaded = _this.state.urlLoaded;
 
       var btnTxt = isPL || isVid ? isPL ? "Playlist" : "Video" : null;
       return _react2.default.createElement(
         'div',
         null,
-        urlLoaded && stateLoaded ? !btnTxt ? null : _react2.default.createElement(
+        urlLoaded ? !btnTxt ? null : _react2.default.createElement(
           'button',
           { onClick: _this.addVidPL },
           'Add ' + btnTxt
@@ -18324,7 +18322,7 @@ var App = function (_Component) {
       );
     };
 
-    _this.state = { urlLoaded: false, stateLoaded: false };
+    _this.state = { urlLoaded: false };
     return _this;
   }
 
@@ -18345,15 +18343,6 @@ var App = function (_Component) {
         _this2.isVid = isVid;
         _this2.vidID = vidID;
         _this2.setState({ urlLoaded: true });
-      });
-      chrome.storage.sync.get('settings', function (data) {
-        var _data$settings = data.settings,
-            allowedVideos = _data$settings.allowedVideos,
-            allowedPlaylists = _data$settings.allowedPlaylists,
-            hideRelated = _data$settings.hideRelated,
-            hideComments = _data$settings.hideComments;
-
-        _this2.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments, stateLoaded: true });
       });
     }
   }]);

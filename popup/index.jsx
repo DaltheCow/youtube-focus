@@ -13,7 +13,7 @@ const vidOrPL = (url) => {
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { urlLoaded: false, stateLoaded: false };
+    this.state = { urlLoaded: false };
   }
 
   componentDidMount() {
@@ -26,35 +26,34 @@ class App extends Component {
           this.setState({ urlLoaded: true });
        }
     );
-    chrome.storage.sync.get('settings', data => {
-      let { allowedVideos, allowedPlaylists, hideRelated, hideComments } = data.settings;
-      this.setState({ allowedVideos, allowedPlaylists, hideRelated, hideComments, stateLoaded: true });
-    });
   }
 
   addVidPL = () => {
-    let { allowedVideos, allowedPlaylists, hideRelated, hideComments } = this.state;
-    const { isPL, PlID, isVid, vidID } = this;
+    chrome.storage.sync.get('settings', data => {
+      let { allowedVideos, allowedPlaylists } = data.settings;
 
-    if (isPL && !allowedPlaylists.includes(PlID)) {
-      allowedPlaylists = allowedPlaylists.concat(PlID);
-    }
-    if (!isPL && isVid && !allowedVideos.includes(vidID)) {
-      allowedVideos = allowedVideos.concat(vidID);
-    }
-    if (isPL || isVid) {
-      const settings = { allowedVideos, allowedPlaylists, hideRelated, hideComments };
-      chrome.storage.sync.set({ settings });
-    }
+      const { isPL, PlID, isVid, vidID } = this;
+
+      if (isPL && !allowedPlaylists.includes(PlID)) {
+        allowedPlaylists = allowedPlaylists.concat(PlID);
+      }
+      if (!isPL && isVid && !allowedVideos.includes(vidID)) {
+        allowedVideos = allowedVideos.concat(vidID);
+      }
+      if (isPL || isVid) {
+        const settings = Object.assign({}, data.settings, { allowedVideos, allowedPlaylists });
+        chrome.storage.sync.set({ settings });
+      }
+    });
   }
 
   render = () => {
     const { isPL, isVid } = this;
-    const { urlLoaded, stateLoaded } = this.state;
+    const { urlLoaded } = this.state;
     const btnTxt = ( (isPL || isVid) ? ( isPL ? "Playlist" : "Video" ) : null );
     return (
       <div>
-        { urlLoaded && stateLoaded ? (
+        { urlLoaded ? (
           !btnTxt ? null : <button onClick={ this.addVidPL }>{ `Add ${btnTxt}` }</button>
         ) : "Loading..."}
       </div>
