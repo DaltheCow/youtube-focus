@@ -18285,13 +18285,15 @@ var App = function (_Component) {
         _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, loaded: true });
       });
       chrome.storage.onChanged.addListener(function (changes, namespace) {
-        if (changes.settings.oldValue.hideRelated !== changes.settings.newValue.hideRelated) {
-          sendStateToContent(changes.settings.newValue.hideRelated, 'hideRelated');
-        } else if (changes.settings.oldValue.hideComments !== changes.settings.newValue.hideComments) {
-          sendStateToContent(changes.settings.newValue.hideComments, 'hideComments');
-        } else if (changes.settings.oldValue.hideEndScreen !== changes.settings.newValue.hideEndScreen) {
-          sendStateToContent(changes.settings.newValue.hideEndScreen, 'hideEndScreen');
+        var _changes$settings = changes.settings,
+            oldValue = _changes$settings.oldValue,
+            newValue = _changes$settings.newValue;
+
+        var fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'allowedVideos', 'allowedPlaylists'];
+        while (oldValue[fields[0]] === newValue[fields[0]]) {
+          fields.shift();
         }
+        _this.setState(_defineProperty({}, fields[0], newValue[fields[0]]));
       });
     };
 
@@ -18303,6 +18305,12 @@ var App = function (_Component) {
       });
     };
 
+    _this.deleteLink = function (listType, link) {
+      // if (listType === 'vid') {
+      //
+      // }
+    };
+
     _this.render = function () {
       var _this$state = _this.state,
           allowedVideos = _this$state.allowedVideos,
@@ -18310,7 +18318,8 @@ var App = function (_Component) {
           hideRelated = _this$state.hideRelated,
           hideComments = _this$state.hideComments,
           hideEndScreen = _this$state.hideEndScreen,
-          loaded = _this$state.loaded;
+          loaded = _this$state.loaded,
+          vidHoverIdx = _this$state.vidHoverIdx;
 
       return _react2.default.createElement(
         'div',
@@ -18387,12 +18396,30 @@ var App = function (_Component) {
           _react2.default.createElement(
             'div',
             { className: 'link-list' },
-            allowedVideos.map(function (vidId) {
+            allowedVideos.map(function (vidId, i) {
               var link = 'https://www.youtube.com/watch?v=' + vidId;
               return _react2.default.createElement(
-                'a',
-                { href: link },
-                link
+                'div',
+                null,
+                _react2.default.createElement(
+                  'a',
+                  { href: link },
+                  link
+                ),
+                _react2.default.createElement(
+                  'div',
+                  null,
+                  _react2.default.createElement('i', { onMouseOver: function onMouseOver() {
+                      return _this.setState({ vidHoverIdx: i });
+                    },
+                    onMouseLeave: function onMouseLeave() {
+                      return _this.setState({ vidHoverIdx: undefined });
+                    },
+                    onClick: function onClick() {
+                      return _this.deleteLink('vid', vidId);
+                    },
+                    className: (vidHoverIdx === i ? 'fas' : 'far') + ' fa-times-circle' })
+                )
               );
             })
           ),

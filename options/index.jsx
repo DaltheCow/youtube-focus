@@ -13,14 +13,13 @@ class App extends Component {
       let { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen } = data.settings;
       this.setState({ allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, loaded: true });
     });
-    chrome.storage.onChanged.addListener(function(changes, namespace) {
-      if (changes.settings.oldValue.hideRelated !== changes.settings.newValue.hideRelated) {
-        sendStateToContent(changes.settings.newValue.hideRelated, 'hideRelated');
-      } else if (changes.settings.oldValue.hideComments !== changes.settings.newValue.hideComments) {
-        sendStateToContent(changes.settings.newValue.hideComments, 'hideComments');
-      } else if (changes.settings.oldValue.hideEndScreen !== changes.settings.newValue.hideEndScreen) {
-        sendStateToContent(changes.settings.newValue.hideEndScreen, 'hideEndScreen');
+    chrome.storage.onChanged.addListener((changes, namespace) => {
+      const { oldValue, newValue } = changes.settings;
+      const fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'allowedVideos', 'allowedPlaylists'];
+      while (oldValue[fields[0]] === newValue[fields[0]]) {
+        fields.shift();
       }
+      this.setState({ [fields[0]]: newValue[fields[0]]});
     });
   }
 
@@ -32,8 +31,14 @@ class App extends Component {
     });
   }
 
+  deleteLink = (listType, link) => {
+    // if (listType === 'vid') {
+    //
+    // }
+  }
+
   render = () => {
-    const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, loaded } = this.state;
+    const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, loaded, vidHoverIdx } = this.state;
     return (
       <div>
         { !loaded ? null : <div>
@@ -64,9 +69,17 @@ class App extends Component {
             </div>
           </div>
           <div className="link-list">
-            { allowedVideos.map(vidId => {
+            { allowedVideos.map((vidId, i) => {
               const link = `https://www.youtube.com/watch?v=${vidId}`;
-              return <a href={ link }>{ link }</a>
+              return (
+                <div>
+                  <a href={ link }>{ link }</a>
+                  <div><i onMouseOver={() => this.setState({vidHoverIdx: i})}
+                          onMouseLeave={() => this.setState({vidHoverIdx: undefined})}
+                          onClick={() => this.deleteLink('vid', vidId)}
+                          className={ `${vidHoverIdx === i ? 'fas' : 'far' } fa-times-circle`}></i></div>
+                </div>
+              );
             }) }
           </div>
           <div className="link-list">
