@@ -18319,121 +18319,165 @@ var App = function (_Component) {
           hideComments = _this$state.hideComments,
           hideEndScreen = _this$state.hideEndScreen,
           loaded = _this$state.loaded,
-          vidHoverIdx = _this$state.vidHoverIdx;
+          vidHoverIdx = _this$state.vidHoverIdx,
+          plHoverIdx = _this$state.plHoverIdx;
+
 
       return _react2.default.createElement(
         'div',
         null,
         !loaded ? null : _react2.default.createElement(
           'div',
-          null,
+          { className: 'main-content' },
           _react2.default.createElement(
             'div',
-            { className: 'switch-container' },
-            'Related Videos:',
+            { className: 'switch-list-container' },
             _react2.default.createElement(
               'div',
-              { className: 'switch' },
+              { className: 'switch-container' },
+              'Related Videos:',
               _react2.default.createElement(
                 'div',
-                null,
-                'SHOW'
-              ),
-              _react2.default.createElement('div', { onClick: function onClick() {
-                  return _this.toggle('hideRelated');
-                }, className: 'switcher_slider' + (hideRelated ? " checked" : "") }),
-              _react2.default.createElement(
-                'div',
-                null,
-                'HIDE'
-              )
-            )
-          ),
-          _react2.default.createElement(
-            'div',
-            { className: 'switch-container' },
-            'Comments:',
-            _react2.default.createElement(
-              'div',
-              { className: 'switch' },
-              _react2.default.createElement(
-                'div',
-                null,
-                'SHOW'
-              ),
-              _react2.default.createElement('div', { onClick: function onClick() {
-                  return _this.toggle('hideComments');
-                }, className: 'switcher_slider' + (hideComments ? " checked" : "") }),
-              _react2.default.createElement(
-                'div',
-                null,
-                'HIDE'
-              )
-            )
-          ),
-          _react2.default.createElement(
-            'div',
-            { className: 'switch-container' },
-            'End Screen Videos:',
-            _react2.default.createElement(
-              'div',
-              { className: 'switch' },
-              _react2.default.createElement(
-                'div',
-                null,
-                'SHOW'
-              ),
-              _react2.default.createElement('div', { onClick: function onClick() {
-                  return _this.toggle('hideEndScreen');
-                }, className: 'switcher_slider' + (hideEndScreen ? " checked" : "") }),
-              _react2.default.createElement(
-                'div',
-                null,
-                'HIDE'
-              )
-            )
-          ),
-          _react2.default.createElement(
-            'div',
-            { className: 'link-list' },
-            allowedVideos.map(function (vidId, i) {
-              var link = 'https://www.youtube.com/watch?v=' + vidId;
-              return _react2.default.createElement(
-                'div',
-                null,
-                _react2.default.createElement(
-                  'a',
-                  { href: link },
-                  link
-                ),
+                { className: 'switch' },
                 _react2.default.createElement(
                   'div',
                   null,
-                  _react2.default.createElement('i', { onMouseOver: function onMouseOver() {
-                      return _this.setState({ vidHoverIdx: i });
-                    },
-                    onMouseLeave: function onMouseLeave() {
-                      return _this.setState({ vidHoverIdx: undefined });
-                    },
-                    onClick: function onClick() {
-                      return _this.deleteLink('vid', vidId);
-                    },
-                    className: (vidHoverIdx === i ? 'fas' : 'far') + ' fa-times-circle' })
+                  'SHOW'
+                ),
+                _react2.default.createElement('div', { onClick: function onClick() {
+                    return _this.toggle('hideRelated');
+                  }, className: 'switcher_slider' + (hideRelated ? " checked" : "") }),
+                _react2.default.createElement(
+                  'div',
+                  null,
+                  'HIDE'
                 )
-              );
-            })
+              )
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'switch-container' },
+              'Comments:',
+              _react2.default.createElement(
+                'div',
+                { className: 'switch' },
+                _react2.default.createElement(
+                  'div',
+                  null,
+                  'SHOW'
+                ),
+                _react2.default.createElement('div', { onClick: function onClick() {
+                    return _this.toggle('hideComments');
+                  }, className: 'switcher_slider' + (hideComments ? " checked" : "") }),
+                _react2.default.createElement(
+                  'div',
+                  null,
+                  'HIDE'
+                )
+              )
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'switch-container' },
+              'End Screen Videos:',
+              _react2.default.createElement(
+                'div',
+                { className: 'switch' },
+                _react2.default.createElement(
+                  'div',
+                  null,
+                  'SHOW'
+                ),
+                _react2.default.createElement('div', { onClick: function onClick() {
+                    return _this.toggle('hideEndScreen');
+                  }, className: 'switcher_slider' + (hideEndScreen ? " checked" : "") }),
+                _react2.default.createElement(
+                  'div',
+                  null,
+                  'HIDE'
+                )
+              )
+            )
           ),
           _react2.default.createElement(
             'div',
-            { className: 'link-list' },
-            allowedPlaylists.map(function (PlID) {
-              var link = 'https://www.youtube.com/playlist?list=' + PlID;
-              return _react2.default.createElement(
-                'a',
-                { href: link },
-                link
-              );
-            })
+            { className: 'link-lists-container' },
+            _react2.default.createElement(
+              'div',
+              { className: 'link-list' },
+              _react2.default.createElement(
+                'div',
+                { className: 'allowed-title' },
+                'Allowed Videos'
+              ),
+              allowedVideos.map(function (vidId, i) {
+                var link = 'https://www.youtube.com/watch?v=' + vidId;
+                return _react2.default.createElement(
+                  'div',
+                  { className: 'link-item-container' },
+                  _react2.default.createElement(
+                    'div',
+                    { className: 'link-item' },
+                    _react2.default.createElement(
+                      'a',
+                      { href: link },
+                      link
+                    ),
+                    _react2.default.createElement(
+                      'div',
+                      { className: 'icon-container', onMouseOver: function onMouseOver() {
+                          return _this.setState({ vidHoverIdx: i });
+                        },
+                        onMouseLeave: function onMouseLeave() {
+                          return _this.setState({ vidHoverIdx: undefined });
+                        },
+                        onClick: function onClick() {
+                          return _this.deleteLink('vid', vidId);
+                        } },
+                      _react2.default.createElement('i', { className: (vidHoverIdx === i ? 'fas' : 'far') + ' fa-times-circle' })
+                    )
+                  )
+                );
+              })
+            ),
+            _react2.default.createElement(
+              'div',
+              { className: 'link-list' },
+              _react2.default.createElement(
+                'div',
+                { className: 'allowed-title' },
+                'Allowed Playlists'
+              ),
+              allowedPlaylists.map(function (PlID, i) {
+                var link = 'https://www.youtube.com/playlist?list=' + PlID;
+                return _react2.default.createElement(
+                  'div',
+                  { className: 'link-item-container' },
+                  _react2.default.createElement(
+                    'div',
+                    { className: 'link-item' },
+                    _react2.default.createElement(
+                      'a',
+                      { href: link },
+                      link
+                    ),
+                    _react2.default.createElement(
+                      'div',
+                      { className: 'icon-container', onMouseOver: function onMouseOver() {
+                          return _this.setState({ plHoverIdx: i });
+                        },
+                        onMouseLeave: function onMouseLeave() {
+                          return _this.setState({ plHoverIdx: undefined });
+                        },
+                        onClick: function onClick() {
+                          return _this.deleteLink('pl', PlID);
+                        } },
+                      _react2.default.createElement('i', { className: (plHoverIdx === i ? 'fas' : 'far') + ' fa-times-circle' })
+                    )
+                  )
+                );
+              })
+            )
           )
         )
       );

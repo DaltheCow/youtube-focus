@@ -38,55 +38,76 @@ class App extends Component {
   }
 
   render = () => {
-    const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, loaded, vidHoverIdx } = this.state;
+    const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, loaded, vidHoverIdx, plHoverIdx } = this.state;
+
     return (
       <div>
-        { !loaded ? null : <div>
-          <div className="switch-container">
-            Related Videos:
-            <div className="switch">
-              <div>SHOW</div>
-              <div onClick={ () => this.toggle('hideRelated') } className={`switcher_slider${hideRelated ? " checked" : ""}`}></div>
-              <div>HIDE</div>
+        { !loaded ? null : <div className="main-content">
+          <div className="switch-list-container">
+            <div className="switch-container">
+              Related Videos:
+              <div className="switch">
+                <div>SHOW</div>
+                <div onClick={ () => this.toggle('hideRelated') } className={`switcher_slider${hideRelated ? " checked" : ""}`}></div>
+                <div>HIDE</div>
+              </div>
             </div>
-          </div>
 
-          <div className="switch-container">
-            Comments:
-            <div className="switch">
-              <div>SHOW</div>
-              <div onClick={ () => this.toggle('hideComments') } className={`switcher_slider${hideComments ? " checked" : ""}`}></div>
-              <div>HIDE</div>
+            <div className="switch-container">
+              Comments:
+              <div className="switch">
+                <div>SHOW</div>
+                <div onClick={ () => this.toggle('hideComments') } className={`switcher_slider${hideComments ? " checked" : ""}`}></div>
+                <div>HIDE</div>
+              </div>
             </div>
-          </div>
 
-          <div className="switch-container">
-            End Screen Videos:
-            <div className="switch">
-              <div>SHOW</div>
-              <div onClick={ () => this.toggle('hideEndScreen') } className={`switcher_slider${hideEndScreen ? " checked" : ""}`}></div>
-              <div>HIDE</div>
+            <div className="switch-container">
+              End Screen Videos:
+              <div className="switch">
+                <div>SHOW</div>
+                <div onClick={ () => this.toggle('hideEndScreen') } className={`switcher_slider${hideEndScreen ? " checked" : ""}`}></div>
+                <div>HIDE</div>
+              </div>
             </div>
           </div>
-          <div className="link-list">
-            { allowedVideos.map((vidId, i) => {
-              const link = `https://www.youtube.com/watch?v=${vidId}`;
-              return (
-                <div>
-                  <a href={ link }>{ link }</a>
-                  <div><i onMouseOver={() => this.setState({vidHoverIdx: i})}
-                          onMouseLeave={() => this.setState({vidHoverIdx: undefined})}
-                          onClick={() => this.deleteLink('vid', vidId)}
-                          className={ `${vidHoverIdx === i ? 'fas' : 'far' } fa-times-circle`}></i></div>
-                </div>
-              );
-            }) }
-          </div>
-          <div className="link-list">
-            { allowedPlaylists.map(PlID => {
-              const link = `https://www.youtube.com/playlist?list=${PlID}`;
-              return <a href={ link }>{ link }</a>
-            }) }
+          <div className="link-lists-container">
+            <div className="link-list">
+              <div className="allowed-title">Allowed Videos</div>
+              { allowedVideos.map((vidId, i) => {
+                const link = `https://www.youtube.com/watch?v=${vidId}`;
+                return (
+                  <div className="link-item-container">
+                    <div className="link-item">
+                      <a href={ link }>{ link }</a>
+                      <div className="icon-container" onMouseOver={() => this.setState({vidHoverIdx: i})}
+                           onMouseLeave={() => this.setState({vidHoverIdx: undefined})}
+                           onClick={() => this.deleteLink('vid', vidId)}>
+                         <i className={ `${vidHoverIdx === i ? 'fas' : 'far' } fa-times-circle`}></i>
+                      </div>
+                    </div>
+                  </div>
+                );
+              }) }
+            </div>
+            <div className="link-list">
+              <div className="allowed-title">Allowed Playlists</div>
+              { allowedPlaylists.map((PlID, i) => {
+                const link = `https://www.youtube.com/playlist?list=${PlID}`;
+                return (
+                  <div className="link-item-container">
+                    <div className="link-item">
+                      <a href={ link }>{ link }</a>
+                        <div className="icon-container" onMouseOver={() => this.setState({plHoverIdx: i})}
+                             onMouseLeave={() => this.setState({plHoverIdx: undefined})}
+                             onClick={() => this.deleteLink('pl', PlID)}>
+                           <i className={ `${plHoverIdx === i ? 'fas' : 'far' } fa-times-circle`}></i>
+                        </div>
+                    </div>
+                  </div>
+                );
+              }) }
+            </div>
           </div>
         </div>}
       </div>
