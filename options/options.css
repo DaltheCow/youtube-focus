@@ -1,11 +1,13 @@
+
 .main-content {
   display: grid;
-  grid-template-columns: 1fr 5fr;
+  grid-template-columns: minmax(150px,17%) 83%;
 }
 
 .switch-list-container {
   background: #3f414a;
   color: #eaeaea;
+  min-width: 150px;
 }
 
 .switcher_slider {
@@ -13,6 +15,7 @@
   align-items: center;
   width: 40px;
   height: 20px;
+  min-width: 40px;
   border-radius: 29px;
   background-color: #f16132;
   cursor: pointer;
@@ -49,19 +52,22 @@
 
 
 .link-lists-container {
-  display: flex;
+  display: grid;
+  grid-template-columns: 45% 55%;
 }
 
 .link-list {
-  margin: 20px;
+  /* padding: 20px; */
   display: inline-block;
   /* display: flex;
   flex-direction: column; */
   padding: 5px;
+  min-width: 200px;
 }
 
 .allowed-title {
   text-align: center;
+  margin: 10px 0;
 }
 
 .link-item-container {
@@ -89,7 +95,7 @@
 .link-item a {
   display: inline-block;
   text-decoration: none;
-  width: 350px;
+  /* min-width: 250px; */
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -106,4 +112,17 @@
 .icon-container {
   display: inline-block;
   margin-left: 10px;
+}
+
+@media screen and (max-width: 790px) {
+  .link-lists-container {
+    display: block;
+    /* flex-direction: column; */
+    grid-template-columns: none;
+  }
+  .main-content {
+    display: flex;
+    grid-template-columns: none;
+  }
+
 }
