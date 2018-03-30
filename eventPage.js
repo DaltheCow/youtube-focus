@@ -6,6 +6,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       });
       break;
     case "getState":
+      //check url here
       chrome.storage.sync.get("settings", function(data) {
         sendStateToContent(data.settings.hideRelated, 'hideRelated');
         sendStateToContent(data.settings.hideComments, 'hideComments');
@@ -30,31 +31,32 @@ chrome.storage.sync.get("settings", function(data) {
   });
 });
 
-(function() {
-  let lastURL = "";
-  chrome.webNavigation.onHistoryStateUpdated.addListener(function(e) {
-      const regex = /https:\/\/www.youtube.com\/*/;
-      const urlChange = e.url === "" || (regex.test(e.url) && e.url !== lastURL);
-      if (urlChange) {
-        lastURL = e.url;
-        chrome.storage.sync.get("settings", function(data) {
-          chrome.tabs.sendMessage( e.tabId,
-                                 { action: "hideField",
-                                   value: data.settings.hideRelated,
-                                   field: 'hideRelated' } );
-          chrome.tabs.sendMessage( e.tabId,
-                                 { action: "hideField",
-                                   value: data.settings.hideComments,
-                                   field: 'hideComments' } );
-          chrome.tabs.sendMessage( e.tabId,
-                                 { action: "hideField",
-                                   value: data.settings.hideEndScreen,
-                                   field: 'hideEndScreen' } );
-        });
-      }
-    }, { url: [{hostSuffix: "youtube.com", pathPrefix: "/watch"}]}
-  );
-})();
+chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
+  const ytRegex = /https:\/\/www.youtube.com\/*/;
+  if (changeInfo.url && ytRegex.test(changeInfo.url)) {
+    const videoRegex = /https:\/\/www.youtube.com\/watch*/;
+    //filter for allowed videos/playlists here
+    //check if strict is on first
+    //also need to check url in getstate
+    if (videoRegex.test(changeInfo.url)) {
+      chrome.storage.sync.get("settings", function(data) {
+        chrome.tabs.sendMessage( tabId,
+          { action: "hideField",
+          value: data.settings.hideRelated,
+          field: 'hideRelated' } );
+          chrome.tabs.sendMessage( tabId,
+            { action: "hideField",
+            value: data.settings.hideComments,
+            field: 'hideComments' } );
+            chrome.tabs.sendMessage( tabId,
+              { action: "hideField",
+              value: data.settings.hideEndScreen,
+              field: 'hideEndScreen' } );
+            });
+    }
+
+  }
+});
 
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
@@ -86,4 +88,13 @@ function ensureSettings(data, callback) {
   chrome.storage.sync.set( { settings }, () => {
     callback();
   });
+}
+
+function vidOrPL(url) {
+  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&list=(.+)?)?/;
+  const res = url.match(regex);
+  return { isPL: Boolean(res[1] || res[5]),
+           PlID: res[2] || res[6],
+           isVid: Boolean((res[3] && res[4])),
+           vidID: res[4] };
 }

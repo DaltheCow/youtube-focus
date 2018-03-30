@@ -18271,6 +18271,7 @@ var App = function (_Component) {
   function App(props) {
     _classCallCheck(this, App);
 
+    //alert(chrome.extension.getURL("not_available.html"));
     var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
     _this.componentDidMount = function () {
@@ -18290,7 +18291,7 @@ var App = function (_Component) {
             newValue = _changes$settings.newValue;
 
         var fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'allowedVideos', 'allowedPlaylists'];
-        while (oldValue[fields[0]] === newValue[fields[0]]) {
+        while (JSON.stringify(oldValue[fields[0]]) === JSON.stringify(newValue[fields[0]])) {
           fields.shift();
         }
         _this.setState(_defineProperty({}, fields[0], newValue[fields[0]]));
@@ -18305,10 +18306,25 @@ var App = function (_Component) {
       });
     };
 
-    _this.deleteLink = function (listType, link) {
-      // if (listType === 'vid') {
-      //
-      // }
+    _this.deleteLink = function (listType, id) {
+      chrome.storage.sync.get('settings', function (data) {
+        var _data$settings2 = data.settings,
+            allowedVideos = _data$settings2.allowedVideos,
+            allowedPlaylists = _data$settings2.allowedPlaylists;
+
+
+        if (listType === 'pl') {
+          allowedPlaylists = allowedPlaylists.filter(function (PlID) {
+            return PlID !== id;
+          });
+        } else {
+          allowedVideos = allowedVideos.filter(function (vidID) {
+            return vidID !== id;
+          });
+        }
+        var settings = Object.assign({}, data.settings, { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists });
+        chrome.storage.sync.set({ settings: settings });
+      });
     };
 
     _this.render = function () {
@@ -18341,7 +18357,7 @@ var App = function (_Component) {
                 { className: 'switch' },
                 _react2.default.createElement(
                   'div',
-                  null,
+                  { className: 'switch-show' },
                   'SHOW'
                 ),
                 _react2.default.createElement('div', { onClick: function onClick() {
@@ -18349,7 +18365,7 @@ var App = function (_Component) {
                   }, className: 'switcher_slider' + (hideRelated ? " checked" : "") }),
                 _react2.default.createElement(
                   'div',
-                  null,
+                  { className: 'switch-hide' },
                   'HIDE'
                 )
               )
@@ -18363,7 +18379,7 @@ var App = function (_Component) {
                 { className: 'switch' },
                 _react2.default.createElement(
                   'div',
-                  null,
+                  { className: 'switch-show' },
                   'SHOW'
                 ),
                 _react2.default.createElement('div', { onClick: function onClick() {
@@ -18371,7 +18387,7 @@ var App = function (_Component) {
                   }, className: 'switcher_slider' + (hideComments ? " checked" : "") }),
                 _react2.default.createElement(
                   'div',
-                  null,
+                  { className: 'switch-hide' },
                   'HIDE'
                 )
               )
@@ -18385,7 +18401,7 @@ var App = function (_Component) {
                 { className: 'switch' },
                 _react2.default.createElement(
                   'div',
-                  null,
+                  { className: 'switch-show' },
                   'SHOW'
                 ),
                 _react2.default.createElement('div', { onClick: function onClick() {
@@ -18393,7 +18409,7 @@ var App = function (_Component) {
                   }, className: 'switcher_slider' + (hideEndScreen ? " checked" : "") }),
                 _react2.default.createElement(
                   'div',
-                  null,
+                  { className: 'switch-hide' },
                   'HIDE'
                 )
               )
@@ -18404,7 +18420,7 @@ var App = function (_Component) {
             { className: 'link-lists-container' },
             _react2.default.createElement(
               'div',
-              { className: 'link-list' },
+              { className: 'link-list right' },
               _react2.default.createElement(
                 'div',
                 { className: 'allowed-title' },
@@ -18414,7 +18430,7 @@ var App = function (_Component) {
                 var link = 'https://www.youtube.com/watch?v=' + vidId;
                 return _react2.default.createElement(
                   'div',
-                  { className: 'link-item-container' },
+                  { key: i, className: 'link-item-container' },
                   _react2.default.createElement(
                     'div',
                     { className: 'link-item' },
@@ -18434,7 +18450,7 @@ var App = function (_Component) {
                         onClick: function onClick() {
                           return _this.deleteLink('vid', vidId);
                         } },
-                      _react2.default.createElement('i', { className: (vidHoverIdx === i ? 'fas' : 'far') + ' fa-times-circle' })
+                      _react2.default.createElement('i', { className: 'far fa-times-circle' })
                     )
                   )
                 );
@@ -18452,7 +18468,7 @@ var App = function (_Component) {
                 var link = 'https://www.youtube.com/playlist?list=' + PlID;
                 return _react2.default.createElement(
                   'div',
-                  { className: 'link-item-container' },
+                  { key: i, className: 'link-item-container' },
                   _react2.default.createElement(
                     'div',
                     { className: 'link-item' },
@@ -18472,7 +18488,7 @@ var App = function (_Component) {
                         onClick: function onClick() {
                           return _this.deleteLink('pl', PlID);
                         } },
-                      _react2.default.createElement('i', { className: (plHoverIdx === i ? 'fas' : 'far') + ' fa-times-circle' })
+                      _react2.default.createElement('i', { className: 'far fa-times-circle' })
                     )
                   )
                 );
