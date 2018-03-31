@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 27);
+/******/ 	return __webpack_require__(__webpack_require__.s = 28);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -18243,11 +18243,14 @@ module.exports = camelize;
 
 /***/ }),
 /* 26 */,
-/* 27 */
+/* 27 */,
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
 
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
 var _react = __webpack_require__(4);
 
@@ -18256,8 +18259,6 @@ var _react2 = _interopRequireDefault(_react);
 var _reactDom = __webpack_require__(17);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
-
-function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -18271,260 +18272,24 @@ var App = function (_Component) {
   function App(props) {
     _classCallCheck(this, App);
 
+    // this.state = { urlLoaded: false };
     var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
-    _this.componentDidMount = function () {
-      chrome.storage.sync.get('settings', function (data) {
-        var _data$settings = data.settings,
-            allowedVideos = _data$settings.allowedVideos,
-            allowedPlaylists = _data$settings.allowedPlaylists,
-            hideRelated = _data$settings.hideRelated,
-            hideComments = _data$settings.hideComments,
-            hideEndScreen = _data$settings.hideEndScreen,
-            enableContentBlocking = _data$settings.enableContentBlocking;
-
-        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, enableContentBlocking: enableContentBlocking, loaded: true });
-      });
-      chrome.storage.onChanged.addListener(function (changes, namespace) {
-        var _changes$settings = changes.settings,
-            oldValue = _changes$settings.oldValue,
-            newValue = _changes$settings.newValue;
-
-        var fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'allowedVideos', 'allowedPlaylists', 'enableContentBlocking'];
-        while (JSON.stringify(oldValue[fields[0]]) === JSON.stringify(newValue[fields[0]])) {
-          fields.shift();
-        }
-        _this.setState(_defineProperty({}, fields[0], newValue[fields[0]]));
-      });
-    };
-
-    _this.toggle = function (field_name) {
-      var field = _this.state[field_name];
-      var settings = Object.assign({}, _this.state, _defineProperty({}, field_name, !field));
-      chrome.storage.sync.set({ settings: settings }, function () {
-        _this.setState(_defineProperty({}, field_name, !field));
-      });
-    };
-
-    _this.deleteLink = function (listType, id) {
-      chrome.storage.sync.get('settings', function (data) {
-        var _data$settings2 = data.settings,
-            allowedVideos = _data$settings2.allowedVideos,
-            allowedPlaylists = _data$settings2.allowedPlaylists;
-
-
-        if (listType === 'pl') {
-          allowedPlaylists = allowedPlaylists.filter(function (PlID) {
-            return PlID !== id;
-          });
-        } else {
-          allowedVideos = allowedVideos.filter(function (vidID) {
-            return vidID !== id;
-          });
-        }
-        var settings = Object.assign({}, data.settings, { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists });
-        chrome.storage.sync.set({ settings: settings });
-      });
-    };
-
     _this.render = function () {
-      var _this$state = _this.state,
-          allowedVideos = _this$state.allowedVideos,
-          allowedPlaylists = _this$state.allowedPlaylists,
-          hideRelated = _this$state.hideRelated,
-          hideComments = _this$state.hideComments,
-          hideEndScreen = _this$state.hideEndScreen,
-          enableContentBlocking = _this$state.enableContentBlocking,
-          loaded = _this$state.loaded,
-          vidHoverIdx = _this$state.vidHoverIdx,
-          plHoverIdx = _this$state.plHoverIdx;
-
-
       return _react2.default.createElement(
         'div',
         null,
-        !loaded ? null : _react2.default.createElement(
-          'div',
-          { className: 'main-content' },
-          _react2.default.createElement(
-            'div',
-            { className: 'switch-list-container' },
-            _react2.default.createElement(
-              'div',
-              { className: 'switch-container' },
-              'Related Videos:',
-              _react2.default.createElement(
-                'div',
-                { className: 'switch' },
-                _react2.default.createElement(
-                  'div',
-                  { className: 'switch-show' },
-                  'SHOW'
-                ),
-                _react2.default.createElement('div', { onClick: function onClick() {
-                    return _this.toggle('hideRelated');
-                  }, className: 'switcher_slider' + (hideRelated ? " checked" : "") }),
-                _react2.default.createElement(
-                  'div',
-                  { className: 'switch-hide' },
-                  'HIDE'
-                )
-              )
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'switch-container' },
-              'Comments:',
-              _react2.default.createElement(
-                'div',
-                { className: 'switch' },
-                _react2.default.createElement(
-                  'div',
-                  { className: 'switch-show' },
-                  'SHOW'
-                ),
-                _react2.default.createElement('div', { onClick: function onClick() {
-                    return _this.toggle('hideComments');
-                  }, className: 'switcher_slider' + (hideComments ? " checked" : "") }),
-                _react2.default.createElement(
-                  'div',
-                  { className: 'switch-hide' },
-                  'HIDE'
-                )
-              )
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'switch-container' },
-              'End Screen Videos:',
-              _react2.default.createElement(
-                'div',
-                { className: 'switch' },
-                _react2.default.createElement(
-                  'div',
-                  { className: 'switch-show' },
-                  'SHOW'
-                ),
-                _react2.default.createElement('div', { onClick: function onClick() {
-                    return _this.toggle('hideEndScreen');
-                  }, className: 'switcher_slider' + (hideEndScreen ? " checked" : "") }),
-                _react2.default.createElement(
-                  'div',
-                  { className: 'switch-hide' },
-                  'HIDE'
-                )
-              )
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'switch-container' },
-              'Video/Playlist Blocking:',
-              _react2.default.createElement(
-                'div',
-                { className: 'switch' },
-                _react2.default.createElement(
-                  'div',
-                  { className: 'switch-show' },
-                  'OFF'
-                ),
-                _react2.default.createElement('div', { onClick: function onClick() {
-                    return _this.toggle('enableContentBlocking');
-                  }, className: 'switcher_slider' + (enableContentBlocking ? " checked" : "") }),
-                _react2.default.createElement(
-                  'div',
-                  { className: 'switch-hide' },
-                  'ON'
-                )
-              )
-            )
-          ),
-          _react2.default.createElement(
-            'div',
-            { className: 'link-lists-container' },
-            _react2.default.createElement(
-              'div',
-              { className: 'link-list right' },
-              _react2.default.createElement(
-                'div',
-                { className: 'allowed-title' },
-                'Allowed Videos'
-              ),
-              allowedVideos.map(function (vidId, i) {
-                var link = 'https://www.youtube.com/watch?v=' + vidId;
-                return _react2.default.createElement(
-                  'div',
-                  { key: i, className: 'link-item-container' },
-                  _react2.default.createElement(
-                    'div',
-                    { className: 'link-item' },
-                    _react2.default.createElement(
-                      'a',
-                      { href: link },
-                      link
-                    ),
-                    _react2.default.createElement(
-                      'div',
-                      { className: 'icon-container', onMouseOver: function onMouseOver() {
-                          return _this.setState({ vidHoverIdx: i });
-                        },
-                        onMouseLeave: function onMouseLeave() {
-                          return _this.setState({ vidHoverIdx: undefined });
-                        },
-                        onClick: function onClick() {
-                          return _this.deleteLink('vid', vidId);
-                        } },
-                      _react2.default.createElement('i', { className: 'far fa-times-circle' })
-                    )
-                  )
-                );
-              })
-            ),
-            _react2.default.createElement(
-              'div',
-              { className: 'link-list' },
-              _react2.default.createElement(
-                'div',
-                { className: 'allowed-title' },
-                'Allowed Playlists'
-              ),
-              allowedPlaylists.map(function (PlID, i) {
-                var link = 'https://www.youtube.com/playlist?list=' + PlID;
-                return _react2.default.createElement(
-                  'div',
-                  { key: i, className: 'link-item-container' },
-                  _react2.default.createElement(
-                    'div',
-                    { className: 'link-item' },
-                    _react2.default.createElement(
-                      'a',
-                      { href: link },
-                      link
-                    ),
-                    _react2.default.createElement(
-                      'div',
-                      { className: 'icon-container', onMouseOver: function onMouseOver() {
-                          return _this.setState({ plHoverIdx: i });
-                        },
-                        onMouseLeave: function onMouseLeave() {
-                          return _this.setState({ plHoverIdx: undefined });
-                        },
-                        onClick: function onClick() {
-                          return _this.deleteLink('pl', PlID);
-                        } },
-                      _react2.default.createElement('i', { className: 'far fa-times-circle' })
-                    )
-                  )
-                );
-              })
-            )
-          )
-        )
+        'hihi'
       );
     };
 
-    _this.state = { loaded: false };
     return _this;
   }
+
+  _createClass(App, [{
+    key: 'componentDidMount',
+    value: function componentDidMount() {}
+  }]);
 
   return App;
 }(_react.Component);

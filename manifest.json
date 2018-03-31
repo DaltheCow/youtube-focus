@@ -12,7 +12,7 @@
   },
 
   "web_accessible_resources": [
-    "not_available.html"
+    "not_available/not_available.html"
   ],
 
   "content_scripts": [

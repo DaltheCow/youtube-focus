@@ -4,18 +4,17 @@ import { render } from 'react-dom';
 class App extends Component {
   constructor(props) {
     super(props);
-    //alert(chrome.extension.getURL("not_available.html"));
     this.state = { loaded: false };
   }
 
   componentDidMount = () => {
     chrome.storage.sync.get('settings', data => {
-      let { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen } = data.settings;
-      this.setState({ allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, loaded: true });
+      let { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = data.settings;
+      this.setState({ allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded: true });
     });
     chrome.storage.onChanged.addListener((changes, namespace) => {
       const { oldValue, newValue } = changes.settings;
-      const fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'allowedVideos', 'allowedPlaylists'];
+      const fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'allowedVideos', 'allowedPlaylists', 'enableContentBlocking'];
       while (JSON.stringify(oldValue[fields[0]]) === JSON.stringify(newValue[fields[0]])) {
         fields.shift();
       }
@@ -46,7 +45,7 @@ class App extends Component {
   }
 
   render = () => {
-    const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, loaded, vidHoverIdx, plHoverIdx } = this.state;
+    const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded, vidHoverIdx, plHoverIdx } = this.state;
 
     return (
       <div>
@@ -76,6 +75,15 @@ class App extends Component {
                 <div className="switch-show">SHOW</div>
                 <div onClick={ () => this.toggle('hideEndScreen') } className={`switcher_slider${hideEndScreen ? " checked" : ""}`}></div>
                 <div className="switch-hide">HIDE</div>
+              </div>
+            </div>
+
+            <div className="switch-container">
+              Video/Playlist Blocking:
+              <div className="switch">
+                <div className="switch-show">OFF</div>
+                <div onClick={ () => this.toggle('enableContentBlocking') } className={`switcher_slider${enableContentBlocking ? " checked" : ""}`}></div>
+                <div className="switch-hide">ON</div>
               </div>
             </div>
           </div>

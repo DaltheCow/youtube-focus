@@ -6,11 +6,15 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       });
       break;
     case "getState":
-      //check url here
       chrome.storage.sync.get("settings", function(data) {
-        sendStateToContent(data.settings.hideRelated, 'hideRelated');
-        sendStateToContent(data.settings.hideComments, 'hideComments');
-        sendStateToContent(data.settings.hideEndScreen, 'hideEndScreen');
+        if (data.settings.enableContentBlocking) {
+          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
+            blockContent(tabs[0].id, tabs[0].url, data.settings.allowedVideos, data.settings.allowedPlaylists);
+          });
+        }
+        ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
+          sendStateToContent(data.settings[field], field);
+        });
       });
       break;
   }
@@ -20,14 +24,24 @@ chrome.tabs.query({}, function(tabs) {
   const regex = /https:\/\/www.youtube.com\/*/;
   const ytTabs = Array.from(tabs)
   .filter(tab => regex.test(tab.url));
-  ytTabs.forEach(tab => chrome.pageAction.show(tab.id));
+  ytTabs.forEach(tab => {
+    chrome.pageAction.show(tab.id);
+  });
 });
 
 chrome.storage.sync.get("settings", function(data) {
   ensureSettings(data, () => {
-    sendStateToContent(data.settings.hideRelated, 'hideRelated');
-    sendStateToContent(data.settings.hideComments, 'hideComments');
-    sendStateToContent(data.settings.hideEndScreen, 'hideEndScreen');
+    chrome.tabs.query({}, function(tabs) {
+      const regex = /https:\/\/www.youtube.com\/*/;
+      const ytTabs = Array.from(tabs)
+      .filter(tab => regex.test(tab.url));
+      ytTabs.forEach(tab => {
+        blockContent(tab.id, tab.url, data.settings.allowedVideos, data.settings.allowedPlaylists);
+      });
+    });
+    ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
+      sendStateToContent(data.settings[field], field);
+    });
   });
 });
 
@@ -35,37 +49,37 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
   const ytRegex = /https:\/\/www.youtube.com\/*/;
   if (changeInfo.url && ytRegex.test(changeInfo.url)) {
     const videoRegex = /https:\/\/www.youtube.com\/watch*/;
-    //filter for allowed videos/playlists here
-    //check if strict is on first
-    //also need to check url in getstate
-    if (videoRegex.test(changeInfo.url)) {
-      chrome.storage.sync.get("settings", function(data) {
-        chrome.tabs.sendMessage( tabId,
-          { action: "hideField",
-          value: data.settings.hideRelated,
-          field: 'hideRelated' } );
-          chrome.tabs.sendMessage( tabId,
-            { action: "hideField",
-            value: data.settings.hideComments,
-            field: 'hideComments' } );
-            chrome.tabs.sendMessage( tabId,
-              { action: "hideField",
-              value: data.settings.hideEndScreen,
-              field: 'hideEndScreen' } );
-            });
-    }
+    chrome.storage.sync.get("settings", function(data) {
+      if (videoRegex.test(changeInfo.url)) {
+        ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
+          chrome.tabs.sendMessage( tabId, { action: 'hideField', value: data.settings[field], field });
+        });
+      }
+      if (data.settings.enableContentBlocking) {
+        blockContent(tabId, changeInfo.url, data.settings.allowedVideos, data.settings.allowedPlaylists);
+      }
+  });
 
   }
 });
 
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
-  if (changes.settings.oldValue.hideRelated !== changes.settings.newValue.hideRelated) {
-    sendStateToContent(changes.settings.newValue.hideRelated, 'hideRelated');
-  } else if (changes.settings.oldValue.hideComments !== changes.settings.newValue.hideComments) {
-    sendStateToContent(changes.settings.newValue.hideComments, 'hideComments');
-  } else if (changes.settings.oldValue.hideEndScreen !== changes.settings.newValue.hideEndScreen) {
-    sendStateToContent(changes.settings.newValue.hideEndScreen, 'hideEndScreen');
+  const { oldValue, newValue } = changes.settings;
+  if (oldValue.hideRelated !== newValue.hideRelated) {
+    sendStateToContent(newValue.hideRelated, 'hideRelated');
+  } else if (oldValue.hideComments !== newValue.hideComments) {
+    sendStateToContent(newValue.hideComments, 'hideComments');
+  } else if (oldValue.hideEndScreen !== newValue.hideEndScreen) {
+    sendStateToContent(newValue.hideEndScreen, 'hideEndScreen');
+  } else if (oldValue.enableContentBlocking !== newValue.enableContentBlocking) {
+    if (newValue.enableContentBlocking) {
+      chrome.tabs.query({}, function(tabs) {
+        Array.from(tabs).forEach(tab => {
+          blockContent(tab.id, tab.url, newValue.allowedVideos, newValue.allowedPlaylists);
+        });
+      });
+    }
   }
 });
 
@@ -78,23 +92,36 @@ function sendStateToContent(value, field) {
 }
 
 function ensureSettings(data, callback) {
-  let { hideRelated, hideComments, hideEndScreen, allowedVideos, allowedPlaylists } = data.settings;
+  let { hideRelated, hideComments, hideEndScreen, enableContentBlocking, allowedVideos, allowedPlaylists } = data.settings;
   hideRelated = Boolean(hideRelated);
   hideComments = Boolean(hideComments);
   hideEndScreen = Boolean(hideEndScreen);
+  enableContentBlocking = Boolean(enableContentBlocking);
   allowedVideos = allowedVideos === undefined ? [] : allowedVideos;
   allowedPlaylists = allowedPlaylists === undefined ? [] : allowedPlaylists;
-  const settings = { hideRelated, hideComments, hideEndScreen, allowedVideos, allowedPlaylists };
+  const settings = { hideRelated, hideComments, hideEndScreen, enableContentBlocking, allowedVideos, allowedPlaylists };
   chrome.storage.sync.set( { settings }, () => {
     callback();
   });
 }
 
+function blockContent(tabId, url, allowedVideos, allowedPlaylists) {
+  const { isPL, PlID, isVid, vidID, notYt } = vidOrPL(url);
+  const pageIsntAllowed = (((isVid && !isPL) && !allowedVideos.includes(vidID)) || (isPL && !allowedPlaylists.includes(PlID)) || (!isVid && !isPL && !notYt));
+  console.log(url);
+  console.log(pageIsntAllowed);
+  if (pageIsntAllowed) {
+    chrome.tabs.update(tabId, {url: "not_available/not_available.html"});
+  }
+}
+
 function vidOrPL(url) {
   const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&list=(.+)?)?/;
   const res = url.match(regex);
-  return { isPL: Boolean(res[1] || res[5]),
-           PlID: res[2] || res[6],
-           isVid: Boolean((res[3] && res[4])),
-           vidID: res[4] };
+  const result = !res ? { isPL: false, PlID: null, isVid: false, vidID: null, notYt: true } : {
+    isPL: Boolean(res[1] || res[5]),
+    PlID: (res[2] || res[6]),
+    isVid: Boolean(res[3] && res[4]),
+    vidID: res[4] };
+  return result;
 }

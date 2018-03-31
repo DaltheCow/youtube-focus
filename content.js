@@ -15,5 +15,7 @@ chrome.runtime.onMessage.addListener(data => {
             document.body.classList.remove(className);
           }
         }
+        break;
+      case 'rab': console.log(data.value);
     }
 });

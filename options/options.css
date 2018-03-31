@@ -46,8 +46,10 @@ body {
 }
 
 .switch {
+  width: 120px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
 }
 
 .switch-container {
@@ -55,11 +57,13 @@ body {
 }
 
 .switch-show {
-  margin-right: 8px;
+  width: 40px;
 }
 
 .switch-hide {
-  margin-left: 8px;
+  display: flex;
+  justify-content: flex-end;
+  width: 40px;
 }
 
 

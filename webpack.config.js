@@ -3,7 +3,8 @@ const { resolve } = require('path');
 module.exports = {
   entry: {
     popup: './popup/index.jsx',
-    options: './options/index.jsx'
+    options: './options/index.jsx',
+    not_available: './not_available/index.jsx'
   },
   output: {
     path: resolve('./public'),
