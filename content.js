@@ -16,6 +16,14 @@ chrome.runtime.onMessage.addListener(data => {
           }
         }
         break;
-      case 'rab': console.log(data.value);
+      case 'gatherVideoInfo':
+        //i need to gather title and an image if I can, then send a message
+        break;
+      case 'gatherPLInfoPL':
+        var title = document.querySelector('.yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
+        break;
+      case 'gatherPLInfo2Video':
+        var title = document.querySelector('.yt-simple-endpoint.style-scope.yt-formatted-string');
+        break;
     }
 });

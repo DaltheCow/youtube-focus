@@ -108,15 +108,13 @@ function ensureSettings(data, callback) {
 function blockContent(tabId, url, allowedVideos, allowedPlaylists) {
   const { isPL, PlID, isVid, vidID, notYt } = vidOrPL(url);
   const pageIsntAllowed = (((isVid && !isPL) && !allowedVideos.includes(vidID)) || (isPL && !allowedPlaylists.includes(PlID)) || (!isVid && !isPL && !notYt));
-  console.log(url);
-  console.log(pageIsntAllowed);
   if (pageIsntAllowed) {
     chrome.tabs.update(tabId, {url: "not_available/not_available.html"});
   }
 }
 
 function vidOrPL(url) {
-  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&list=(.+)?)?/;
+  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&list=([^&]+)?)?&?.*/;
   const res = url.match(regex);
   const result = !res ? { isPL: false, PlID: null, isVid: false, vidID: null, notYt: true } : {
     isPL: Boolean(res[1] || res[5]),

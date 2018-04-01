@@ -89,6 +89,7 @@ body {
 .link-item-container {
   border-top: 1px solid #ccc;
   padding: 0 5px;
+  position: relative;
 }
 
 .link-item-container:last-child {
@@ -148,4 +149,23 @@ body {
     border-right: none;
   }
 
+}
+
+.thumbnail-img-container {
+  position: absolute;
+  right: -200px;
+  top: 0;
+  visibility: hidden;
+  z-index: 10;
+  width: 200px;
+  /* transition: visibility 0s 1s; */
+}
+
+.thumbnail-img-container img {
+  width: 200px;
+}
+
+.link-item-container:hover .thumbnail-img-container {
+  transition: visibility 0s 0.10s;
+  visibility: visible;
 }

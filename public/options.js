@@ -18474,6 +18474,11 @@ var App = function (_Component) {
                           return _this.deleteLink('vid', vidId);
                         } },
                       _react2.default.createElement('i', { className: 'far fa-times-circle' })
+                    ),
+                    _react2.default.createElement(
+                      'div',
+                      { className: 'thumbnail-img-container' },
+                      _react2.default.createElement('img', { src: 'https://img.youtube.com/vi/' + vidId + '/0.jpg' })
                     )
                   )
                 );

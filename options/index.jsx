@@ -101,6 +101,9 @@ class App extends Component {
                            onClick={() => this.deleteLink('vid', vidId)}>
                          <i className="far fa-times-circle"></i>
                       </div>
+                      <div className="thumbnail-img-container">
+                        <img src={`https://img.youtube.com/vi/${vidId}/0.jpg`}/>
+                      </div>
                     </div>
                   </div>
                 );
