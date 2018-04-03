@@ -4,7 +4,7 @@ body {
 
 .main-content {
   display: grid;
-  grid-template-columns: minmax(166px,17%) 1fr;
+  grid-template-columns: minmax(166px, 17%) 1fr;
 }
 
 .switch-list-container {
@@ -158,7 +158,6 @@ body {
   visibility: hidden;
   z-index: 10;
   width: 200px;
-  /* transition: visibility 0s 1s; */
 }
 
 .thumbnail-img-container img {

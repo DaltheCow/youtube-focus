@@ -18255,6 +18255,14 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = __webpack_require__(17);
 
+var _linkList = __webpack_require__(29);
+
+var _linkList2 = _interopRequireDefault(_linkList);
+
+var _linkItem = __webpack_require__(30);
+
+var _linkItem2 = _interopRequireDefault(_linkItem);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
@@ -18278,19 +18286,21 @@ var App = function (_Component) {
         var _data$settings = data.settings,
             allowedVideos = _data$settings.allowedVideos,
             allowedPlaylists = _data$settings.allowedPlaylists,
+            videoStorage = _data$settings.videoStorage,
+            plStorage = _data$settings.plStorage,
             hideRelated = _data$settings.hideRelated,
             hideComments = _data$settings.hideComments,
             hideEndScreen = _data$settings.hideEndScreen,
             enableContentBlocking = _data$settings.enableContentBlocking;
 
-        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, enableContentBlocking: enableContentBlocking, loaded: true });
+        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, videoStorage: videoStorage, plStorage: plStorage, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, enableContentBlocking: enableContentBlocking, loaded: true });
       });
       chrome.storage.onChanged.addListener(function (changes, namespace) {
         var _changes$settings = changes.settings,
             oldValue = _changes$settings.oldValue,
             newValue = _changes$settings.newValue;
 
-        var fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'allowedVideos', 'allowedPlaylists', 'enableContentBlocking'];
+        var fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'enableContentBlocking', 'allowedVideos', 'allowedPlaylists', 'videoStorage', 'plStorage'];
         while (JSON.stringify(oldValue[fields[0]]) === JSON.stringify(newValue[fields[0]])) {
           fields.shift();
         }
@@ -18310,19 +18320,23 @@ var App = function (_Component) {
       chrome.storage.sync.get('settings', function (data) {
         var _data$settings2 = data.settings,
             allowedVideos = _data$settings2.allowedVideos,
-            allowedPlaylists = _data$settings2.allowedPlaylists;
+            allowedPlaylists = _data$settings2.allowedPlaylists,
+            videoStorage = _data$settings2.videoStorage,
+            plStorage = _data$settings2.plStorage;
 
 
         if (listType === 'pl') {
           allowedPlaylists = allowedPlaylists.filter(function (PlID) {
             return PlID !== id;
           });
+          delete plStorage[id];
         } else {
           allowedVideos = allowedVideos.filter(function (vidID) {
             return vidID !== id;
           });
+          delete videoStorage[id];
         }
-        var settings = Object.assign({}, data.settings, { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists });
+        var settings = Object.assign({}, data.settings, { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, videoStorage: videoStorage, plStorage: plStorage });
         chrome.storage.sync.set({ settings: settings });
       });
     };
@@ -18331,13 +18345,13 @@ var App = function (_Component) {
       var _this$state = _this.state,
           allowedVideos = _this$state.allowedVideos,
           allowedPlaylists = _this$state.allowedPlaylists,
+          videoStorage = _this$state.videoStorage,
+          plStorage = _this$state.plStorage,
           hideRelated = _this$state.hideRelated,
           hideComments = _this$state.hideComments,
           hideEndScreen = _this$state.hideEndScreen,
           enableContentBlocking = _this$state.enableContentBlocking,
-          loaded = _this$state.loaded,
-          vidHoverIdx = _this$state.vidHoverIdx,
-          plHoverIdx = _this$state.plHoverIdx;
+          loaded = _this$state.loaded;
 
 
       return _react2.default.createElement(
@@ -18418,7 +18432,7 @@ var App = function (_Component) {
             _react2.default.createElement(
               'div',
               { className: 'switch-container' },
-              'Video/Playlist Blocking:',
+              'Content Restrictions:',
               _react2.default.createElement(
                 'div',
                 { className: 'switch' },
@@ -18521,6 +18535,18 @@ var App = function (_Component) {
                   )
                 );
               })
+            ),
+            _react2.default.createElement(
+              _linkList2.default,
+              null,
+              allowedVideos.map(function (id) {
+                var vidInfo = videoStorage[id];
+                return _react2.default.createElement(
+                  'div',
+                  { key: id },
+                  'hi'
+                );
+              })
             )
           )
         )
@@ -18535,6 +18561,86 @@ var App = function (_Component) {
 }(_react.Component);
 
 (0, _reactDom.render)(_react2.default.createElement(App, null), document.getElementById('root'));
+
+/***/ }),
+/* 28 */,
+/* 29 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+var _react = __webpack_require__(4);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
+
+function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
+
+var LinkList = function (_React$Component) {
+  _inherits(LinkList, _React$Component);
+
+  function LinkList(props) {
+    _classCallCheck(this, LinkList);
+
+    return _possibleConstructorReturn(this, (LinkList.__proto__ || Object.getPrototypeOf(LinkList)).call(this, props));
+  }
+
+  _createClass(LinkList, [{
+    key: 'render',
+    value: function render() {
+
+      return _react2.default.createElement(
+        'div',
+        null,
+        this.props.children
+      );
+    }
+  }]);
+
+  return LinkList;
+}(_react2.default.Component);
+
+exports.default = LinkList;
+
+/***/ }),
+/* 30 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+
+var _react = __webpack_require__(4);
+
+var _react2 = _interopRequireDefault(_react);
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+var LinkList = function LinkList(props) {
+
+  return _react2.default.createElement(
+    'div',
+    null,
+    undefined.props.children
+  );
+};
+
+exports.default = LinkList;
 
 /***/ })
 /******/ ]);

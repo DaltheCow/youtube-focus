@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
+import LinkList from '../components/linkList.jsx';
+import LinkItem from '../components/linkItem.jsx';
 
 class App extends Component {
   constructor(props) {
@@ -9,12 +11,12 @@ class App extends Component {
 
   componentDidMount = () => {
     chrome.storage.sync.get('settings', data => {
-      let { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = data.settings;
-      this.setState({ allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded: true });
+      let { allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = data.settings;
+      this.setState({ allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded: true });
     });
     chrome.storage.onChanged.addListener((changes, namespace) => {
       const { oldValue, newValue } = changes.settings;
-      const fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'allowedVideos', 'allowedPlaylists', 'enableContentBlocking'];
+      const fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'enableContentBlocking', 'allowedVideos', 'allowedPlaylists', 'videoStorage', 'plStorage'];
       while (JSON.stringify(oldValue[fields[0]]) === JSON.stringify(newValue[fields[0]])) {
         fields.shift();
       }
@@ -32,20 +34,22 @@ class App extends Component {
 
   deleteLink = (listType, id) => {
     chrome.storage.sync.get('settings', data => {
-      let { allowedVideos, allowedPlaylists } = data.settings;
+      let { allowedVideos, allowedPlaylists, videoStorage, plStorage } = data.settings;
 
       if (listType === 'pl') {
         allowedPlaylists = allowedPlaylists.filter(PlID => PlID !== id);
+        delete plStorage[id];
       } else {
         allowedVideos = allowedVideos.filter(vidID => vidID !== id);
+        delete videoStorage[id];
       }
-      const settings = Object.assign({}, data.settings, { allowedVideos, allowedPlaylists });
+      const settings = Object.assign({}, data.settings, { allowedVideos, allowedPlaylists, videoStorage, plStorage });
       chrome.storage.sync.set({ settings });
     });
   }
 
   render = () => {
-    const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded, vidHoverIdx, plHoverIdx } = this.state;
+    const { allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded } = this.state;
 
     return (
       <div>
@@ -79,7 +83,7 @@ class App extends Component {
             </div>
 
             <div className="switch-container">
-              Video/Playlist Blocking:
+              Content Restrictions:
               <div className="switch">
                 <div className="switch-show">OFF</div>
                 <div onClick={ () => this.toggle('enableContentBlocking') } className={`switcher_slider${enableContentBlocking ? " checked" : ""}`}></div>
@@ -96,8 +100,8 @@ class App extends Component {
                   <div key={i} className="link-item-container">
                     <div className="link-item">
                       <a href={ link }>{ link }</a>
-                      <div className="icon-container" onMouseOver={() => this.setState({vidHoverIdx: i})}
-                           onMouseLeave={() => this.setState({vidHoverIdx: undefined})}
+                      <div className="icon-container" onMouseOver={() => this.setState({ vidHoverIdx: i })}
+                           onMouseLeave={() => this.setState({ vidHoverIdx: undefined })}
                            onClick={() => this.deleteLink('vid', vidId)}>
                          <i className="far fa-times-circle"></i>
                       </div>
@@ -118,7 +122,7 @@ class App extends Component {
                     <div className="link-item">
                       <a href={ link }>{ link }</a>
                         <div className="icon-container" onMouseOver={() => this.setState({plHoverIdx: i})}
-                             onMouseLeave={() => this.setState({plHoverIdx: undefined})}
+                             onMouseLeave={() => this.setState({ plHoverIdx: undefined })}
                              onClick={() => this.deleteLink('pl', PlID)}>
                            <i className="far fa-times-circle"></i>
                         </div>
@@ -127,6 +131,14 @@ class App extends Component {
                 );
               }) }
             </div>
+            <LinkList>
+              { allowedVideos.map(id => {
+                const vidInfo = videoStorage[id];
+                return (
+                  <div key={ id }>hi</div>
+                );
+              })}
+            </LinkList>
           </div>
         </div>}
       </div>

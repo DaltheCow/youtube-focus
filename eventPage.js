@@ -92,14 +92,16 @@ function sendStateToContent(value, field) {
 }
 
 function ensureSettings(data, callback) {
-  let { hideRelated, hideComments, hideEndScreen, enableContentBlocking, allowedVideos, allowedPlaylists } = data.settings;
+  let { hideRelated, hideComments, hideEndScreen, enableContentBlocking, allowedVideos, allowedPlaylists, videoStorage, plStorage } = data.settings;
   hideRelated = Boolean(hideRelated);
   hideComments = Boolean(hideComments);
   hideEndScreen = Boolean(hideEndScreen);
   enableContentBlocking = Boolean(enableContentBlocking);
   allowedVideos = allowedVideos === undefined ? [] : allowedVideos;
   allowedPlaylists = allowedPlaylists === undefined ? [] : allowedPlaylists;
-  const settings = { hideRelated, hideComments, hideEndScreen, enableContentBlocking, allowedVideos, allowedPlaylists };
+  videoStorage = videoStorage === undefined ? {} : videoStorage;
+  plStorage = plStorage === undefined ? {} : plStorage;
+  const settings = { hideRelated, hideComments, hideEndScreen, enableContentBlocking, allowedVideos, allowedPlaylists, videoStorage, plStorage };
   chrome.storage.sync.set( { settings }, () => {
     callback();
   });
