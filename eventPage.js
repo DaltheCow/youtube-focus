@@ -116,11 +116,11 @@ function blockContent(tabId, url, allowedVideos, allowedPlaylists) {
 }
 
 function vidOrPL(url) {
-  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&list=([^&]+)?)?&?.*/;
+  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
   const res = url.match(regex);
   const result = !res ? { isPL: false, PlID: null, isVid: false, vidID: null, notYt: true } : {
-    isPL: Boolean(res[1] || res[5]),
-    PlID: (res[2] || res[6]),
+    isPL: Boolean(res[1] || res[6]),
+    PlID: (res[2] || res[7]),
     isVid: Boolean(res[3] && res[4]),
     vidID: res[4] };
   return result;

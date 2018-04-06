@@ -42,20 +42,30 @@ function gatherPLinfo() {
   const numVids = stats[0];
   const numViews = stats[1];
   const contents = document.querySelectorAll('#contents #contents #contents .style-scope.ytd-playlist-video-list-renderer');
-  const plVideos = Array.from(contents).map(node => {
-    //filter out private videos
+  const plVideos = mapFilter(Array.from(contents), node => {
     const thumbnailImg = node.querySelector('#thumbnail #img').getAttribute('src');
-    const duration = node.querySelector('#thumbnail #overlays .style-scope.ytd-thumbnail-overlay-time-status-renderer').innerText;
+    const durationNode = node.querySelector('#thumbnail #overlays .style-scope.ytd-thumbnail-overlay-time-status-renderer');
+    //filter out private videos
+    if (!durationNode) {
+      return undefined;
+    }
+    const duration = durationNode.innerText;
     const title = node.querySelector('#meta #video-title').innerText;
     const channel = node.querySelector('#metadata #byline .yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
     return { thumbnailImg, duration, title, channel };
-  });
+  }, res => res !== undefined);
   return { plName, stats, numVids, numViews, plVideos };
 }
 
+gatherPLinfo()
+
 function gatherVideoInfo() {
-  //filter out private videos
-  const title = document.querySelector('#info .title .style-scope.ytd-video-primary-info-renderer').innerText;
+  const titleNode = document.querySelector('#info .title .style-scope.ytd-video-primary-info-renderer');
+  //filter out private/not available videos
+  if (!titleNode) {
+    return { title: null, viewsLong: null, viewsShort: null, channel: null, publishDate: null, duration: null };
+  }
+  const title = titleNode.innerText;
   const viewsLong = document.querySelector('#info #count .view-count.style-scope.yt-view-count-renderer').innerText;
   const viewsShort = document.querySelector('#info #count .short-view-count.style-scope.yt-view-count-renderer').innerText;
   const channel = document.querySelector('#upload-info #owner-container .yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
@@ -70,6 +80,16 @@ function gatherVideoInfo() {
 function gatherPLinfo2() {
   //filter out private videos
   const plName = document.querySelector('.yt-simple-endpoint.style-scope.yt-formatted-string');
-  const numVids = document.querySelector('#header-contents #publisher-container .index-message.style-scope.ytd-playlist-panel-renderer').innerText;
+  const numVids = document.querySelector('#header-contents #publisher-container .index-message.style-scope.ytd-playlist-panel-renderer').innerText.split(' ').pop();
   return { plName, numVids };
+}
+
+
+function mapFilter(arr, func, test) {
+  const newArr = [];
+  arr.forEach(el => {
+    const res = func(el);
+    if (test(res)) newArr.push(res);
+  });
+  return newArr;
 }
