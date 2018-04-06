@@ -4,7 +4,7 @@ chrome.runtime.sendMessage({ action: "getState" });
 
 chrome.runtime.onMessage.addListener(data => {
     switch(data.action) {
-      case "hideField": {
+      case 'hideField': {
         const regex = /https:\/\/www.youtube.com\/watch*/;
         if (regex.test(location.href)) {
           const legend = { 'hideRelated': 'hide-related', 'hideComments': 'hide-comments', 'hideEndScreen': 'hide-end-screen' };
@@ -18,18 +18,15 @@ chrome.runtime.onMessage.addListener(data => {
         break;
       }
       case 'gatherVideoInfo': {
-        const info = gatherVideoInfo();
-
+        sendVideoinfo();
         break;
       }
-      case 'gatherPLInfoPL': {
-        const info = gatherPLinfo();
+      case 'gatherPLInfo': {
+        sendPLinfo();
       }
         break;
-      case 'gatherPLInfo2Video': {
-        const vidInfo = gatherVideoInfo();
-        const plInfo = gatherPLinfo2();
-
+      case 'gatherPLInfo2': {
+        sendPL2info();
       }
     }
 });
@@ -37,27 +34,33 @@ chrome.runtime.onMessage.addListener(data => {
 //upon loading tab/page, if this video/playlist is in allowedVideos/allowedPlaylists then update the info
 
 function gatherPLinfo() {
-  const plName = document.querySelector('#title .yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
+  const plNameNode = document.querySelector('#title .yt-simple-endpoint.style-scope.yt-formatted-string');
+  //filter out private playlists
+  if (!plNameNode) {
+    return { plName: null, stats: null, numVids: null, numViews: null, plVideos: null };
+  }
+  plName = plNameNode.innerText;
   const stats = document.querySelectorAll('#stats .style-scope.ytd-playlist-sidebar-primary-info-renderer');
   const numVids = stats[0];
   const numViews = stats[1];
   const contents = document.querySelectorAll('#contents #contents #contents .style-scope.ytd-playlist-video-list-renderer');
+
   const plVideos = mapFilter(Array.from(contents), node => {
-    const thumbnailImg = node.querySelector('#thumbnail #img').getAttribute('src');
     const durationNode = node.querySelector('#thumbnail #overlays .style-scope.ytd-thumbnail-overlay-time-status-renderer');
     //filter out private videos
     if (!durationNode) {
-      return undefined;
+      return { plName: null, stats: null, numVids: null, numViews: null, plVideos: null };
     }
     const duration = durationNode.innerText;
+    const thumbnailImg = node.querySelector('#thumbnail #img').getAttribute('src');
     const title = node.querySelector('#meta #video-title').innerText;
     const channel = node.querySelector('#metadata #byline .yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
-    return { thumbnailImg, duration, title, channel };
+    const index = document.querySelector('#contents #contents #index').innerText;
+    return { thumbnailImg, duration, title, channel, index };
   }, res => res !== undefined);
+
   return { plName, stats, numVids, numViews, plVideos };
 }
-
-gatherPLinfo()
 
 function gatherVideoInfo() {
   const titleNode = document.querySelector('#info .title .style-scope.ytd-video-primary-info-renderer');
@@ -70,7 +73,7 @@ function gatherVideoInfo() {
   const viewsShort = document.querySelector('#info #count .short-view-count.style-scope.yt-view-count-renderer').innerText;
   const channel = document.querySelector('#upload-info #owner-container .yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
   const publishDate = document.querySelector('#upload-info .date.style-scope.ytd-video-secondary-info-renderer').innerText;
-  let duration;
+  let duration = null;
   if (!document.querySelector('#ytd-player .ad-interrupting')) {
     duration = document.querySelector('.ytp-chrome-controls .ytp-time-display .ytp-time-duration').innerText;
   }
@@ -78,10 +81,30 @@ function gatherVideoInfo() {
 }
 
 function gatherPLinfo2() {
-  //filter out private videos
-  const plName = document.querySelector('.yt-simple-endpoint.style-scope.yt-formatted-string');
+  //filter out private playlists
+  const plNameNode = document.querySelector('#header-contents .yt-simple-endpoint.style-scope.yt-formatted-string');
+  if (!plNameNode) {
+    return { plName: null, numVids: null };
+  }
+  const plName = plNameNode.innerText;
   const numVids = document.querySelector('#header-contents #publisher-container .index-message.style-scope.ytd-playlist-panel-renderer').innerText.split(' ').pop();
   return { plName, numVids };
+}
+
+function sendPLinfo() {
+  const info = gatherPLinfo();
+  chrome.runtime.sendMessage({ action: "receivePL", info });
+}
+
+function sendPL2info() {
+  const vidInfo = gatherVideoInfo();
+  const plInfo = gatherPLinfo2();
+  chrome.runtime.sendMessage({ action: "receivePL2", vidInfo, plInfo });
+}
+
+function sendVideoinfo() {
+  const info = gatherVideoInfo();
+  chrome.runtime.sendMessage({ action: "receiveVideo", info });
 }
 
 
@@ -93,3 +116,8 @@ function mapFilter(arr, func, test) {
   });
   return newArr;
 }
+
+//see if these are present when content.js loads
+console.log(gatherPLinfo());
+console.log(gatherVideoInfo());
+console.log(gatherPLinfo2());
