@@ -18302,6 +18302,13 @@ var App = function (_Component) {
         if (isPL || isVid) {
           var settings = Object.assign({}, data.settings, { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists });
           chrome.storage.sync.set({ settings: settings });
+          var action = void 0;
+          if (isPL && isVid) {
+            action = 'gatherPLInfo2';
+          } else {
+            action = isPL ? 'gatherPLInfo' : 'gatherVideoInfo';
+          }
+          chrome.tabs.sendMessage(_this.state.tabId, { action: action });
         }
       });
     };
@@ -18323,7 +18330,7 @@ var App = function (_Component) {
       );
     };
 
-    _this.state = { urlLoaded: false };
+    _this.state = { urlLoaded: false, tabId: null };
     return _this;
   }
 
@@ -18343,7 +18350,7 @@ var App = function (_Component) {
         _this2.PlID = PlID;
         _this2.isVid = isVid;
         _this2.vidID = vidID;
-        _this2.setState({ urlLoaded: true });
+        _this2.setState({ urlLoaded: true, tabId: tabs[0].id });
       });
     }
   }]);

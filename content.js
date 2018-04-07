@@ -1,5 +1,5 @@
-chrome.runtime.sendMessage({ action: "showPageAction" });
-chrome.runtime.sendMessage({ action: "getState" });
+chrome.runtime.sendMessage({ action: 'showPageAction' });
+chrome.runtime.sendMessage({ action: 'getState' });
 
 
 chrome.runtime.onMessage.addListener(data => {
@@ -92,19 +92,22 @@ function gatherPLinfo2() {
 }
 
 function sendPLinfo() {
+  const url = window.location.href;
   const info = gatherPLinfo();
-  chrome.runtime.sendMessage({ action: "receivePL", info });
+  chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receivePL', info, url });
 }
 
 function sendPL2info() {
+  const url = window.location.href;
   const vidInfo = gatherVideoInfo();
   const plInfo = gatherPLinfo2();
-  chrome.runtime.sendMessage({ action: "receivePL2", vidInfo, plInfo });
+  chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receivePL2', vidInfo, plInfo, url });
 }
 
 function sendVideoinfo() {
+  const url = window.location.href;
   const info = gatherVideoInfo();
-  chrome.runtime.sendMessage({ action: "receiveVideo", info });
+  chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receiveVideo', info, url });
 }
 
 

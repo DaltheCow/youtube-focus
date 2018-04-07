@@ -14,7 +14,7 @@ const vidOrPL = (url) => {
 class App extends Component {
   constructor(props) {
     super(props);
-    this.state = { urlLoaded: false };
+    this.state = { urlLoaded: false, tabId: null };
   }
 
   componentDidMount() {
@@ -24,7 +24,7 @@ class App extends Component {
           this.PlID = PlID;
           this.isVid = isVid;
           this.vidID = vidID;
-          this.setState({ urlLoaded: true });
+          this.setState({ urlLoaded: true, tabId: tabs[0].id });
        }
     );
   }
@@ -44,6 +44,13 @@ class App extends Component {
       if (isPL || isVid) {
         const settings = Object.assign({}, data.settings, { allowedVideos, allowedPlaylists });
         chrome.storage.sync.set({ settings });
+        let action;
+        if (isPL && isVid) {
+          action = 'gatherPLInfo2';
+        } else {
+          action = isPL ? 'gatherPLInfo' : 'gatherVideoInfo';
+        }
+        chrome.tabs.sendMessage(this.state.tabId, { action });
       }
     });
   }
