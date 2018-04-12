@@ -26,16 +26,34 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           switch(type) {
             case 'receivePL': {
               let { plStorage } = data.settings;
-              // plStorage[] = plStorage || {};
-
+              const { info } = request;
+              plStorage[PlID] = plStorage[PlID] || {};
+              plStorage[PlID] = Object.assign({}, plStorage[PlID], info);
+              const settings = Object.assign({}, data.settings, { plStorage: newPLStorage });
+              chrome.storage.sync.set({ settings });
+              console.log(settings);
               break;
             }
             case 'receivePL2': {
-              const { vidInfo, plInfo } = request
+              let { plStorage, videoStorage } = data.settings;
+              const { vidInfo, plInfo } = request;
+              plStorage[PlID] = plStorage[PlID] || {};
+              videoStorage[vidID] = videoStorage[vidID] || {};
+              let newPLStorage = Object.assign({}, plStorage);
+              let newVideoStorage = Object.assign({}, videoStorage);
+              newPLStorage[PlID] = Object.assign({}, newPLStorage[PlID], plInfo);
+              newVideoStorage[vidID] = Object.assign({}, newVideoStorage[vidID], vidInfo);
+              const settings = Object.assign({}, data.settings, { plStorage: newPLStorage, videoStorage: newVideoStorage });
+              chrome.storage.sync.set({ settings });
               break;
             }
             case 'receiveVideo': {
-
+              let { videoStorage } = data.settings;
+              const { info } = request;
+              videoStorage[vidID] = videoStorage[vidID] || {};
+              videoStorage[vidID] = Object.assign({}, plStorage[PlID], info);
+              const settings = Object.assign({}, data.settings, { videoStorage: newVideoStorage });
+              chrome.storage.sync.set({ settings });
             }
           }
         });
@@ -55,14 +73,16 @@ chrome.tabs.query({}, function(tabs) {
 
 chrome.storage.sync.get('settings', function(data) {
   ensureSettings(data, () => {
-    chrome.tabs.query({}, function(tabs) {
-      const regex = /https:\/\/www.youtube.com\/*/;
-      const ytTabs = Array.from(tabs)
-      .filter(tab => regex.test(tab.url));
-      ytTabs.forEach(tab => {
-        blockContent(tab.id, tab.url, data.settings.allowedVideos, data.settings.allowedPlaylists);
+    if (data.settings.enableContentBlocking) {
+      chrome.tabs.query({}, function(tabs) {
+        const regex = /https:\/\/www.youtube.com\/*/;
+        const ytTabs = Array.from(tabs)
+        .filter(tab => regex.test(tab.url));
+        ytTabs.forEach(tab => {
+          blockContent(tab.id, tab.url, data.settings.allowedVideos, data.settings.allowedPlaylists);
+        });
       });
-    });
+    }
     ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
       sendStateToContent(data.settings[field], field);
     });
@@ -79,8 +99,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
           chrome.tabs.sendMessage( tabId, { action: 'hideField', value: data.settings[field], field });
         });
       }
-
-      //when tabs update check url, if in one of the lists, send appropriate action
+      updateStorageInfoMsg(tabId, changeInfo.url, data.settings.allowedVideos, data.settings.allowedPlaylists);
 
       if (data.settings.enableContentBlocking) {
         blockContent(tabId, changeInfo.url, data.settings.allowedVideos, data.settings.allowedPlaylists);
@@ -89,6 +108,8 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
 
   }
 });
+
+
 
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
@@ -109,6 +130,24 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
     }
   }
 });
+
+function updateStorageInfoMsg(tabId, url, allowedVideos, allowedPlaylists) {
+  const { isPL, PlID, isVid, vidID, notYt } = vidOrPL(url);
+  if ( isPL && isVid) {
+    if (allowedVideos.includes(vidID) || allowedPlaylists.includes(PlID)) {
+      chrome.tabs.sendMessage(tabId, { action: 'gatherPLInfo2' });
+    }
+  } else if (isPL) {
+    if (allowedPlaylists.includes(PlID)) {
+      chrome.tabs.sendMessage(tabId, { action: 'gatherPLInfo' });
+    }
+  } else if (isVid) {
+    if (allowedVideos.includes(vidID)) {
+      chrome.tabs.sendMessage(tabId, { action: 'gatherVideoInfo' });
+    }
+
+  }
+}
 
 function sendStateToContent(value, field) {
   chrome.tabs.query({}, function(tabs) {

@@ -18541,11 +18541,7 @@ var App = function (_Component) {
               null,
               allowedVideos.map(function (id) {
                 var vidInfo = videoStorage[id];
-                return _react2.default.createElement(
-                  'div',
-                  { key: id },
-                  'hi'
-                );
+                return _react2.default.createElement('div', { key: id });
               })
             )
           )
@@ -18630,7 +18626,7 @@ var _react2 = _interopRequireDefault(_react);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var LinkList = function LinkList(props) {
+var LinkItem = function LinkItem(props) {
 
   return _react2.default.createElement(
     'div',
@@ -18639,7 +18635,7 @@ var LinkList = function LinkList(props) {
   );
 };
 
-exports.default = LinkList;
+exports.default = LinkItem;
 
 /***/ })
 /******/ ]);

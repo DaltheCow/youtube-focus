@@ -135,7 +135,7 @@ class App extends Component {
               { allowedVideos.map(id => {
                 const vidInfo = videoStorage[id];
                 return (
-                  <div key={ id }>hi</div>
+                  <div key={ id }></div>
                 );
               })}
             </LinkList>

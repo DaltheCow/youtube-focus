@@ -41,8 +41,8 @@ function gatherPLinfo() {
   }
   plName = plNameNode.innerText;
   const stats = document.querySelectorAll('#stats .style-scope.ytd-playlist-sidebar-primary-info-renderer');
-  const numVids = stats[0];
-  const numViews = stats[1];
+  const numVids = stats[0].innerText;
+  const numViews = stats[1].innerText;
   const contents = document.querySelectorAll('#contents #contents #contents .style-scope.ytd-playlist-video-list-renderer');
 
   const plVideos = mapFilter(Array.from(contents), node => {
@@ -59,7 +59,7 @@ function gatherPLinfo() {
     return { thumbnailImg, duration, title, channel, index };
   }, res => res !== undefined);
 
-  return { plName, stats, numVids, numViews, plVideos };
+  return { plName, numVids, numViews, plVideos };
 }
 
 function gatherVideoInfo() {
@@ -119,8 +119,3 @@ function mapFilter(arr, func, test) {
   });
   return newArr;
 }
-
-//see if these are present when content.js loads
-console.log(gatherPLinfo());
-console.log(gatherVideoInfo());
-console.log(gatherPLinfo2());

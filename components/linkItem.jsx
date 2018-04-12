@@ -1,6 +1,6 @@
 import React from 'react';
 
-const LinkList = (props) => {
+const LinkItem = (props) => {
 
   return (
     <div>
@@ -9,4 +9,4 @@ const LinkList = (props) => {
   );
 };
 
-export default LinkList;
+export default LinkItem;
