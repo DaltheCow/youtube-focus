@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
+import VideoLinkItem from '../components/VideoLinkItem.jsx';
 import LinkList from '../components/linkList.jsx';
-import LinkItem from '../components/linkItem.jsx';
 
 class App extends Component {
   constructor(props) {
@@ -12,7 +12,7 @@ class App extends Component {
   componentDidMount = () => {
     chrome.storage.sync.get('settings', data => {
       let { allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = data.settings;
-      this.setState({ allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded: true });
+      this.setState({ allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded: true }, () => console.log(this.state));
     });
     chrome.storage.onChanged.addListener((changes, namespace) => {
       const { oldValue, newValue } = changes.settings;
@@ -132,10 +132,10 @@ class App extends Component {
               }) }
             </div>
             <LinkList>
-              { allowedVideos.map(id => {
+              { console.log(videoStorage) || allowedVideos.map(id => {
                 const vidInfo = videoStorage[id];
                 return (
-                  <div key={ id }></div>
+                  <VideoLinkItem { ...vidInfo } id={ id } />
                 );
               })}
             </LinkList>

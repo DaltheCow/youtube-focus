@@ -7,38 +7,34 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       break;
     }
     case 'getState': {
-      chrome.storage.sync.get('settings', function(request) {
-        if (request.settings.enableContentBlocking) {
-          chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-            blockContent(tabs[0].id, tabs[0].url, request.settings.allowedVideos, request.settings.allowedPlaylists);
-          });
+      chrome.storage.sync.get('settings', function(data) {
+        const tabId = sender.tab.id,
+              url = sender.tab.url;
+        if (data.settings.enableContentBlocking) {
+            blockContent(tabId, url, data.settings.allowedVideos, data.settings.allowedPlaylists);
         }
+        updateStorageInfoMsg(tabId, url, data.settings.allowedVideos, data.settings.allowedPlaylists);
         ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
-          sendStateToContent(request.settings[field], field);
+          sendStateToContent(data.settings[field], field, tabId);
         });
       });
       break;
     }
     case 'receiveStorageInfo': {
-      const { url, type } = request;
-      const { isPL, PlID, isVid, vidID } = vidOrPL(url)
+      const { url, type, vidInfo, plInfo, info } = request;
+      const { isPL, PlID, isVid, vidID } = vidOrPL(url);
         chrome.storage.sync.get('settings', function(data) {
+          let { plStorage, videoStorage } = data.settings;
           switch(type) {
             case 'receivePL': {
-              let { plStorage } = data.settings;
-              const { info } = request;
-              plStorage[PlID] = plStorage[PlID] || {};
-              plStorage[PlID] = Object.assign({}, plStorage[PlID], info);
+              let newPLStorage = Object.assign({}, plStorage);
+              newPLStorage[PlID] = newPLStorage[PlID] || {};
+              newPLStorage[PlID] = Object.assign({}, plStorage[PlID], info);
               const settings = Object.assign({}, data.settings, { plStorage: newPLStorage });
               chrome.storage.sync.set({ settings });
-              console.log(settings);
               break;
             }
             case 'receivePL2': {
-              let { plStorage, videoStorage } = data.settings;
-              const { vidInfo, plInfo } = request;
-              plStorage[PlID] = plStorage[PlID] || {};
-              videoStorage[vidID] = videoStorage[vidID] || {};
               let newPLStorage = Object.assign({}, plStorage);
               let newVideoStorage = Object.assign({}, videoStorage);
               newPLStorage[PlID] = Object.assign({}, newPLStorage[PlID], plInfo);
@@ -48,10 +44,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
               break;
             }
             case 'receiveVideo': {
-              let { videoStorage } = data.settings;
-              const { info } = request;
-              videoStorage[vidID] = videoStorage[vidID] || {};
-              videoStorage[vidID] = Object.assign({}, plStorage[PlID], info);
+              let newVideoStorage = Object.assign({}, videoStorage);
+              newVideoStorage[vidID] = newVideoStorage[vidID] || {};
+              newVideoStorage[vidID] = Object.assign({}, videoStorage[vidID], info);
               const settings = Object.assign({}, data.settings, { videoStorage: newVideoStorage });
               chrome.storage.sync.set({ settings });
             }
@@ -72,6 +67,7 @@ chrome.tabs.query({}, function(tabs) {
 });
 
 chrome.storage.sync.get('settings', function(data) {
+  console.log(data.settings);
   ensureSettings(data, () => {
     if (data.settings.enableContentBlocking) {
       chrome.tabs.query({}, function(tabs) {
@@ -149,9 +145,12 @@ function updateStorageInfoMsg(tabId, url, allowedVideos, allowedPlaylists) {
   }
 }
 
-function sendStateToContent(value, field) {
+function sendStateToContent(value, field, tabId) {
+  var message = { action: 'hideField', value, field };
+  if (tabId) {
+    chrome.tabs.sendMessage(tabId, message);
+  }
   chrome.tabs.query({}, function(tabs) {
-    var message = { action: 'hideField', value, field };
     Array.from(tabs)
     .forEach(tab => chrome.tabs.sendMessage(tab.id, message));
   });

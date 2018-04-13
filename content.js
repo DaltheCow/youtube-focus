@@ -37,7 +37,7 @@ function gatherPLinfo() {
   const plNameNode = document.querySelector('#title .yt-simple-endpoint.style-scope.yt-formatted-string');
   //filter out private playlists
   if (!plNameNode) {
-    return { plName: null, stats: null, numVids: null, numViews: null, plVideos: null };
+    return null;
   }
   plName = plNameNode.innerText;
   const stats = document.querySelectorAll('#stats .style-scope.ytd-playlist-sidebar-primary-info-renderer');
@@ -49,7 +49,7 @@ function gatherPLinfo() {
     const durationNode = node.querySelector('#thumbnail #overlays .style-scope.ytd-thumbnail-overlay-time-status-renderer');
     //filter out private videos
     if (!durationNode) {
-      return { plName: null, stats: null, numVids: null, numViews: null, plVideos: null };
+      return undefined;
     }
     const duration = durationNode.innerText;
     const thumbnailImg = node.querySelector('#thumbnail #img').getAttribute('src');
@@ -66,7 +66,7 @@ function gatherVideoInfo() {
   const titleNode = document.querySelector('#info .title .style-scope.ytd-video-primary-info-renderer');
   //filter out private/not available videos
   if (!titleNode) {
-    return { title: null, viewsLong: null, viewsShort: null, channel: null, publishDate: null, duration: null };
+    return null;
   }
   const title = titleNode.innerText;
   const viewsLong = document.querySelector('#info #count .view-count.style-scope.yt-view-count-renderer').innerText;
@@ -84,7 +84,7 @@ function gatherPLinfo2() {
   //filter out private playlists
   const plNameNode = document.querySelector('#header-contents .yt-simple-endpoint.style-scope.yt-formatted-string');
   if (!plNameNode) {
-    return { plName: null, numVids: null };
+    return null;
   }
   const plName = plNameNode.innerText;
   const numVids = document.querySelector('#header-contents #publisher-container .index-message.style-scope.ytd-playlist-panel-renderer').innerText.split(' ').pop();
@@ -93,21 +93,39 @@ function gatherPLinfo2() {
 
 function sendPLinfo() {
   const url = window.location.href;
-  const info = gatherPLinfo();
-  chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receivePL', info, url });
+  const intervalId = setInterval(() => {
+    const info = gatherPLinfo();
+    if (info !== null)  {
+      chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receivePL', info, url });
+      console.log(info);
+      clearInterval(intervalId);
+    }
+  }, 1000);
 }
 
 function sendPL2info() {
   const url = window.location.href;
-  const vidInfo = gatherVideoInfo();
-  const plInfo = gatherPLinfo2();
-  chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receivePL2', vidInfo, plInfo, url });
+  const intervalId = setInterval(() => {
+    const vidInfo = gatherVideoInfo();
+    const plInfo = gatherPLinfo2();
+    if (vidInfo !== null || plInfo !== null)  {
+      console.log(vidInfo, plInfo);
+      chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receivePL2', vidInfo, plInfo, url });
+      clearInterval(intervalId);
+    }
+  }, 1000);
 }
 
 function sendVideoinfo() {
   const url = window.location.href;
-  const info = gatherVideoInfo();
-  chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receiveVideo', info, url });
+  const intervalId = setInterval(() => {
+    const info = gatherVideoInfo();
+    if (info !== null)  {
+      chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receiveVideo', info, url });
+      console.log(info);
+      clearInterval(intervalId);
+    }
+  }, 1000);
 }
 
 

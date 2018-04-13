@@ -18249,19 +18249,21 @@ module.exports = camelize;
 "use strict";
 
 
+var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
 var _react = __webpack_require__(4);
 
 var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = __webpack_require__(17);
 
+var _VideoLinkItem = __webpack_require__(31);
+
+var _VideoLinkItem2 = _interopRequireDefault(_VideoLinkItem);
+
 var _linkList = __webpack_require__(28);
 
 var _linkList2 = _interopRequireDefault(_linkList);
-
-var _linkItem = __webpack_require__(29);
-
-var _linkItem2 = _interopRequireDefault(_linkItem);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18293,7 +18295,9 @@ var App = function (_Component) {
             hideEndScreen = _data$settings.hideEndScreen,
             enableContentBlocking = _data$settings.enableContentBlocking;
 
-        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, videoStorage: videoStorage, plStorage: plStorage, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, enableContentBlocking: enableContentBlocking, loaded: true });
+        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, videoStorage: videoStorage, plStorage: plStorage, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, enableContentBlocking: enableContentBlocking, loaded: true }, function () {
+          return console.log(_this.state);
+        });
       });
       chrome.storage.onChanged.addListener(function (changes, namespace) {
         var _changes$settings = changes.settings,
@@ -18539,9 +18543,9 @@ var App = function (_Component) {
             _react2.default.createElement(
               _linkList2.default,
               null,
-              allowedVideos.map(function (id) {
+              console.log(videoStorage) || allowedVideos.map(function (id) {
                 var vidInfo = videoStorage[id];
-                return _react2.default.createElement('div', { key: id });
+                return _react2.default.createElement(_VideoLinkItem2.default, _extends({}, vidInfo, { id: id }));
               })
             )
           )
@@ -18610,7 +18614,9 @@ var LinkList = function (_React$Component) {
 exports.default = LinkList;
 
 /***/ }),
-/* 29 */
+/* 29 */,
+/* 30 */,
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18626,16 +18632,39 @@ var _react2 = _interopRequireDefault(_react);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-var LinkItem = function LinkItem(props) {
+var VideoLinkItem = function VideoLinkItem(props) {
+  var id = props.id,
+      title = props.title,
+      viewsShort = props.viewsShort,
+      viewsLong = props.viewsLong,
+      channel = props.channel,
+      publishDate = props.publishDate,
+      duration = props.duration;
+
+  console.log(props);
+  duration = !duration ? null : _react2.default.createElement(
+    "div",
+    { className: "duration-container" },
+    duration
+  );
 
   return _react2.default.createElement(
-    'div',
+    "div",
     null,
-    undefined.props.children
+    _react2.default.createElement(
+      "a",
+      { href: "https://www.youtube.com/watch?v=" + id },
+      _react2.default.createElement(
+        "div",
+        { className: "img-duration-container" },
+        _react2.default.createElement("img", { src: "https://img.youtube.com/vi/" + id + "/0.jpg" }),
+        duration
+      )
+    )
   );
 };
 
-exports.default = LinkItem;
+exports.default = VideoLinkItem;
 
 /***/ })
 /******/ ]);
