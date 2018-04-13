@@ -7,6 +7,17 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       break;
     }
     case 'getState': {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', sender.tab.url);
+      xhr.onload = function() {
+          if (xhr.status === 200) {
+              console.log(xhr.responseText);
+          }
+          else {
+              alert('Request failed.  Returned status of ' + xhr.status);
+          }
+      };
+      xhr.send();
       chrome.storage.sync.get('settings', function(data) {
         const tabId = sender.tab.id,
               url = sender.tab.url;
