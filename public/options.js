@@ -18659,6 +18659,15 @@ var VideoLinkItem = function VideoLinkItem(props) {
         { className: "img-duration-container" },
         _react2.default.createElement("img", { src: "https://img.youtube.com/vi/" + id + "/0.jpg" }),
         duration
+      ),
+      _react2.default.createElement(
+        "div",
+        { className: "vid-info" },
+        _react2.default.createElement(
+          "div",
+          null,
+          title
+        )
       )
     )
   );

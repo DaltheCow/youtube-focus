@@ -12,7 +12,8 @@
   },
 
   "web_accessible_resources": [
-    "not_available/not_available.html"
+    "not_available/not_available.html",
+    "window_access.js"
   ],
 
   "content_scripts": [

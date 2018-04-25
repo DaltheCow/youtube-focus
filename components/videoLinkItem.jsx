@@ -7,7 +7,8 @@ const VideoLinkItem = (props) => {
     <div className="duration-container">
       { duration }
     </div>
-  )
+  );
+
 
   return (
     <div>
@@ -15,6 +16,9 @@ const VideoLinkItem = (props) => {
         <div className="img-duration-container">
           <img src={`https://img.youtube.com/vi/${id}/0.jpg`} />
           { duration }
+        </div>
+        <div className="vid-info">
+          <div>{ title }</div>
         </div>
       </a>
     </div>

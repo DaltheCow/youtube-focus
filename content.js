@@ -23,10 +23,11 @@ chrome.runtime.onMessage.addListener(data => {
       }
       case 'gatherPLInfo': {
         sendPLinfo();
-      }
         break;
+      }
       case 'gatherPLInfo2': {
         sendPL2info();
+        break;
       }
     }
 });
@@ -97,7 +98,6 @@ function sendPLinfo() {
     const info = gatherPLinfo();
     if (info !== null)  {
       chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receivePL', info, url });
-      console.log(info);
       clearInterval(intervalId);
     }
   }, 1000);
@@ -109,7 +109,6 @@ function sendPL2info() {
     const vidInfo = gatherVideoInfo();
     const plInfo = gatherPLinfo2();
     if (vidInfo !== null || plInfo !== null)  {
-      console.log(vidInfo, plInfo);
       chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receivePL2', vidInfo, plInfo, url });
       clearInterval(intervalId);
     }
@@ -122,7 +121,6 @@ function sendVideoinfo() {
     const info = gatherVideoInfo();
     if (info !== null)  {
       chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receiveVideo', info, url });
-      console.log(info);
       clearInterval(intervalId);
     }
   }, 1000);
@@ -137,3 +135,38 @@ function mapFilter(arr, func, test) {
   });
   return newArr;
 }
+
+// if (!window['ytInitialPlayerResponse']) {
+//   console.log('not loaded');
+// } else {
+//   console.log('loaded from the beginning');
+// }
+// const intvl = setInterval(() => {
+//   if (!window['ytInitialPlayerResponse']) {
+//     console.log('not loaded');
+//   } else {
+//     clearInterval(intvl);
+//   }
+// }, 100);
+
+// console.log(window);
+
+// i need to do what
+// im trying to message content script inject from ehre
+// i need to build it
+//
+function injectScript(file, node) {
+    var th = document.getElementsByTagName(node)[0];
+    var s = document.createElement('script');
+    s.setAttribute('type', 'text/javascript');
+    s.setAttribute('src', file);
+    th.appendChild(s);
+}
+injectScript( chrome.extension.getURL('window_access.js'), 'body');
+
+
+// runtime.onMessageExternal.addListener(data => {
+//   console.log('---------hoi----------');
+//   console.log(data);
+//   console.log('---------hoi----------');
+// });
