@@ -13,7 +13,7 @@
 
   "web_accessible_resources": [
     "not_available/not_available.html",
-    "window_access.js"
+    "getVideoInfo.js"
   ],
 
   "content_scripts": [
@@ -31,4 +31,5 @@
     "webNavigation",
     "tabs"
   ]
+
 }

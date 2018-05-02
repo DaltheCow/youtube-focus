@@ -7,17 +7,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       break;
     }
     case 'getState': {
-      // var xhr = new XMLHttpRequest();
-      // xhr.open('GET', sender.tab.url);
-      // xhr.onload = function() {
-      //     if (xhr.status === 200) {
-      //         console.log(xhr.responseText);
-      //     }
-      //     else {
-      //         alert('Request failed.  Returned status of ' + xhr.status);
-      //     }
-      // };
-      // xhr.send();
       chrome.storage.sync.get('settings', function(data) {
         const tabId = sender.tab.id,
               url = sender.tab.url;
@@ -31,6 +20,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       });
       break;
     }
+    //figure out how to deal with incoming message with ytInfo from window
     case 'receiveStorageInfo': {
       const { url, type, vidInfo, plInfo, info } = request;
       const { isPL, PlID, isVid, vidID } = vidOrPL(url);
@@ -64,6 +54,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
           }
         });
       break;
+    }
+    case 'testing': {
+      console.log('inleeeeeeeeee');
     }
   }
 });
@@ -209,15 +202,3 @@ function vidOrPL(url) {
     vidID: res[4] };
   return result;
 }
-
-
-chrome.runtime.onMessageExternal.addListener(data => {
-  console.log('---------hoi----------');
-  console.log(data);
-  console.log('---------hoi----------');
-});
-
-
-// "externally_connectable": {
-//   "ids": ["*"],
-// },

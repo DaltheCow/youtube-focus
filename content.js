@@ -18,7 +18,7 @@ chrome.runtime.onMessage.addListener(data => {
         break;
       }
       case 'gatherVideoInfo': {
-        sendVideoinfo();
+        retrieveVideoInfo();
         break;
       }
       case 'gatherPLInfo': {
@@ -136,37 +136,27 @@ function mapFilter(arr, func, test) {
   return newArr;
 }
 
-// if (!window['ytInitialPlayerResponse']) {
-//   console.log('not loaded');
-// } else {
-//   console.log('loaded from the beginning');
-// }
-// const intvl = setInterval(() => {
-//   if (!window['ytInitialPlayerResponse']) {
-//     console.log('not loaded');
-//   } else {
-//     clearInterval(intvl);
-//   }
-// }, 100);
+function retrieveVideoInfo() {
+  function injectScript(file, nodeName) {
+    const node = document.getElementsByTagName(nodeName)[0];
+    const script = document.createElement('script');
+    script.setAttribute('type', 'text/javascript');
+    script.setAttribute('src', file);
+    node.appendChild(s);
+  }
+  injectScript( chrome.extension.getURL('getVideoInfo.js'), 'body');
 
-// console.log(window);
-
-// i need to do what
-// im trying to message content script inject from ehre
-// i need to build it
-//
-function injectScript(file, node) {
-    var th = document.getElementsByTagName(node)[0];
-    var s = document.createElement('script');
-    s.setAttribute('type', 'text/javascript');
-    s.setAttribute('src', file);
-    th.appendChild(s);
+  const intvl = setInterval(() => {
+    const span = document.body.querySelector('#forContentScript');
+    if (span) {
+      document.body.removeChild(span);
+      const text = span.innerText;
+      const data = JSON.parse(text);
+      const { date, title, lengthSeconds, author, shortDescription, channelId, viewCount } = data;
+      const info = { title, viewCount, channel: author, publishDate: date, duration: lengthSeconds, shortDescription, channelId };
+      const url = window.location.href;
+      chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receiveVideo', info, url });
+      clearInterval(intvl);
+    }
+  }, 100);
 }
-injectScript( chrome.extension.getURL('window_access.js'), 'body');
-
-
-// runtime.onMessageExternal.addListener(data => {
-//   console.log('---------hoi----------');
-//   console.log(data);
-//   console.log('---------hoi----------');
-// });
