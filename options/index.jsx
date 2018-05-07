@@ -12,10 +12,10 @@ class App extends Component {
   componentDidMount = () => {
     chrome.storage.sync.get('settings', data => {
       let { allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = data.settings;
-      console.log('initial video size');
-      console.log(JSON.stringify(videoStorage).length);
-      console.log('initial pl size');
-      console.log(JSON.stringify(plStorage).length);
+      // console.log('initial video size');
+      // console.log(JSON.stringify(videoStorage).length);
+      // console.log('initial pl size');
+      // console.log(JSON.stringify(plStorage).length);
       this.setState({ allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded: true });
     });
     chrome.storage.onChanged.addListener((changes, namespace) => {
@@ -103,7 +103,7 @@ class App extends Component {
                 return (
                   <div key={i} className="link-item-container">
                     <div className="link-item">
-                      <a href={ link }>{ link }</a>
+                      <a href={ link }>{ videoStorage[vidId] ? videoStorage[vidId].title : link }</a>
                       <div className="icon-container" onMouseOver={() => this.setState({ vidHoverIdx: i })}
                            onMouseLeave={() => this.setState({ vidHoverIdx: undefined })}
                            onClick={() => this.deleteLink('vid', vidId)}>
@@ -124,7 +124,7 @@ class App extends Component {
                 return (
                   <div key={i} className="link-item-container">
                     <div className="link-item">
-                      <a href={ link }>{ link }</a>
+                      <a href={ link }>{ plStorage[PlID] ? plStorage[PlID].plName : link }</a>
                         <div className="icon-container" onMouseOver={() => this.setState({plHoverIdx: i})}
                              onMouseLeave={() => this.setState({ plHoverIdx: undefined })}
                              onClick={() => this.deleteLink('pl', PlID)}>
@@ -136,7 +136,7 @@ class App extends Component {
               }) }
             </div>
             <LinkList>
-              { console.log(videoStorage) || allowedVideos.map(id => {
+              { allowedVideos.map(id => {
                 const vidInfo = videoStorage[id];
                 return (
                   <VideoLinkItem { ...vidInfo } id={ id } />

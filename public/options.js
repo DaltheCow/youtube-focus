@@ -18294,11 +18294,11 @@ var App = function (_Component) {
             hideComments = _data$settings.hideComments,
             hideEndScreen = _data$settings.hideEndScreen,
             enableContentBlocking = _data$settings.enableContentBlocking;
+        // console.log('initial video size');
+        // console.log(JSON.stringify(videoStorage).length);
+        // console.log('initial pl size');
+        // console.log(JSON.stringify(plStorage).length);
 
-        console.log('initial video size');
-        console.log(JSON.stringify(videoStorage).length);
-        console.log('initial pl size');
-        console.log(JSON.stringify(plStorage).length);
         _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, videoStorage: videoStorage, plStorage: plStorage, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, enableContentBlocking: enableContentBlocking, loaded: true });
       });
       chrome.storage.onChanged.addListener(function (changes, namespace) {
@@ -18480,7 +18480,7 @@ var App = function (_Component) {
                     _react2.default.createElement(
                       'a',
                       { href: link },
-                      link
+                      videoStorage[vidId] ? videoStorage[vidId].title : link
                     ),
                     _react2.default.createElement(
                       'div',
@@ -18523,7 +18523,7 @@ var App = function (_Component) {
                     _react2.default.createElement(
                       'a',
                       { href: link },
-                      link
+                      plStorage[PlID] ? plStorage[PlID].plName : link
                     ),
                     _react2.default.createElement(
                       'div',
@@ -18545,7 +18545,7 @@ var App = function (_Component) {
             _react2.default.createElement(
               _linkList2.default,
               null,
-              console.log(videoStorage) || allowedVideos.map(function (id) {
+              allowedVideos.map(function (id) {
                 var vidInfo = videoStorage[id];
                 return _react2.default.createElement(_VideoLinkItem2.default, _extends({}, vidInfo, { id: id }));
               })

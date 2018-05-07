@@ -32,6 +32,9 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
               newPLStorage[PlID] = newPLStorage[PlID] || {};
               newPLStorage[PlID] = Object.assign({}, plStorage[PlID], info);
               const settings = Object.assign({}, data.settings, { plStorage: newPLStorage });
+              console.log(JSON.stringify(settings).length);
+              console.log(settings);
+              // debugger
               chrome.storage.sync.set({ settings });
               break;
             }
@@ -71,7 +74,6 @@ chrome.tabs.query({}, function(tabs) {
 });
 
 chrome.storage.sync.get('settings', function(data) {
-  console.log(data.settings);
   ensureSettings(data, () => {
     if (data.settings.enableContentBlocking) {
       chrome.tabs.query({}, function(tabs) {

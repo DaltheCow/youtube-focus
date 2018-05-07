@@ -18,7 +18,7 @@ chrome.runtime.onMessage.addListener(data => {
         break;
       }
       case 'gatherVideoInfo': {
-        retrieveVideoInfo();
+        sendVideoinfo();
         break;
       }
       case 'gatherPLInfo': {
@@ -60,7 +60,7 @@ function gatherPLinfo() {
     return { thumbnailImg, duration, title, channel, index };
   }, res => res !== undefined);
 
-  return { plName, numVids, numViews, plVideos };
+  return { plName, numVids, numViews }; //, plVideos };
 }
 
 function gatherVideoInfo() {
@@ -142,7 +142,7 @@ function retrieveVideoInfo() {
     const script = document.createElement('script');
     script.setAttribute('type', 'text/javascript');
     script.setAttribute('src', file);
-    node.appendChild(s);
+    node.appendChild(script);
   }
   injectScript( chrome.extension.getURL('getVideoInfo.js'), 'body');
 
