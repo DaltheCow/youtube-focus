@@ -18295,9 +18295,11 @@ var App = function (_Component) {
             hideEndScreen = _data$settings.hideEndScreen,
             enableContentBlocking = _data$settings.enableContentBlocking;
 
-        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, videoStorage: videoStorage, plStorage: plStorage, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, enableContentBlocking: enableContentBlocking, loaded: true }, function () {
-          return console.log(_this.state);
-        });
+        console.log('initial video size');
+        console.log(JSON.stringify(videoStorage).length);
+        console.log('initial pl size');
+        console.log(JSON.stringify(plStorage).length);
+        _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, videoStorage: videoStorage, plStorage: plStorage, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, enableContentBlocking: enableContentBlocking, loaded: true });
       });
       chrome.storage.onChanged.addListener(function (changes, namespace) {
         var _changes$settings = changes.settings,

@@ -193,12 +193,13 @@ function blockContent(tabId, url, allowedVideos, allowedPlaylists) {
 }
 
 function vidOrPL(url) {
-  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
+  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&t=[^&]+)?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
   const res = url.match(regex);
   const result = !res ? { isPL: false, PlID: null, isVid: false, vidID: null, notYt: true } : {
-    isPL: Boolean(res[1] || res[6]),
-    PlID: (res[2] || res[7]),
+    isPL: Boolean(res[1] || res[7]),
+    PlID: (res[2] || res[8]),
     isVid: Boolean(res[3] && res[4]),
     vidID: res[4] };
   return result;
 }
+"https://www.youtube.com/watch?v=sRr9aarnCc8&t=492s&list=PLST5x_izLDUfQeEhXEBlMQoszv7dRFhDo&index=3"

@@ -12,7 +12,11 @@ class App extends Component {
   componentDidMount = () => {
     chrome.storage.sync.get('settings', data => {
       let { allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = data.settings;
-      this.setState({ allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded: true }, () => console.log(this.state));
+      console.log('initial video size');
+      console.log(JSON.stringify(videoStorage).length);
+      console.log('initial pl size');
+      console.log(JSON.stringify(plStorage).length);
+      this.setState({ allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded: true });
     });
     chrome.storage.onChanged.addListener((changes, namespace) => {
       const { oldValue, newValue } = changes.settings;

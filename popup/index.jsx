@@ -2,11 +2,11 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 
 const vidOrPL = (url) => {
-  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
+  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&t=[^&]+)?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
 
   const res = url.match(regex);
-  return { isPL: Boolean(res[1] || res[6]),
-           PlID: res[2] || res[7],
+  return { isPL: Boolean(res[1] || res[7]),
+           PlID: res[2] || res[8],
            isVid: Boolean((res[3] && res[4])),
            vidID: res[4] };
 }
