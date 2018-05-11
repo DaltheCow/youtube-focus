@@ -204,4 +204,21 @@ function vidOrPL(url) {
     vidID: res[4] };
   return result;
 }
-"https://www.youtube.com/watch?v=sRr9aarnCc8&t=492s&list=PLST5x_izLDUfQeEhXEBlMQoszv7dRFhDo&index=3"
+
+function getStorage(key, callback) {
+  if (key === 'settings') {
+    chrome.storage.sync.get(key, callback);
+  } else {
+    //chrome.local
+    chrome.storage.local.get(key, callback);
+  }
+}
+
+function setStorage(key, object, callback) {
+  if (key === 'settings') {
+    chrome.storage.sync.set({ key: object }, callback);
+  } else {
+    //chrome.local
+    chrome.storage.local.set(key, callback);
+  }
+}
