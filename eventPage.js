@@ -115,20 +115,22 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
 
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
-  const { oldValue, newValue } = changes.settings;
-  if (oldValue.hideRelated !== newValue.hideRelated) {
-    sendStateToContent(newValue.hideRelated, 'hideRelated');
-  } else if (oldValue.hideComments !== newValue.hideComments) {
-    sendStateToContent(newValue.hideComments, 'hideComments');
-  } else if (oldValue.hideEndScreen !== newValue.hideEndScreen) {
-    sendStateToContent(newValue.hideEndScreen, 'hideEndScreen');
-  } else if (oldValue.enableContentBlocking !== newValue.enableContentBlocking) {
-    if (newValue.enableContentBlocking) {
-      chrome.tabs.query({}, function(tabs) {
-        Array.from(tabs).forEach(tab => {
-          blockContent(tab.id, tab.url, newValue.allowedVideos, newValue.allowedPlaylists);
+  if (changes.settings) {
+    const { oldValue, newValue } = changes.settings;
+    if (oldValue.hideRelated !== newValue.hideRelated) {
+      sendStateToContent(newValue.hideRelated, 'hideRelated');
+    } else if (oldValue.hideComments !== newValue.hideComments) {
+      sendStateToContent(newValue.hideComments, 'hideComments');
+    } else if (oldValue.hideEndScreen !== newValue.hideEndScreen) {
+      sendStateToContent(newValue.hideEndScreen, 'hideEndScreen');
+    } else if (oldValue.enableContentBlocking !== newValue.enableContentBlocking) {
+      if (newValue.enableContentBlocking) {
+        chrome.tabs.query({}, function(tabs) {
+          Array.from(tabs).forEach(tab => {
+            blockContent(tab.id, tab.url, newValue.allowedVideos, newValue.allowedPlaylists);
+          });
         });
-      });
+      }
     }
   }
 });
@@ -164,9 +166,17 @@ function sendStateToContent(value, field, tabId) {
 
 function ensureSettings(data, callback) {
   let oldSettings = data.settings || {};
+  let oldVideoStorage = data.videoStorage || {};
+  let oldPLStorage = data.plStorage || {};
   if (data.settings === undefined) {
     let settings = {};
-    chrome.storage.sync.set( { settings }, () => {
+    setStorage( { settings }, () => {
+      ensureSettings({ settings }, callback);
+    });
+    return;
+  } else if (data.videoStorage === undefined) {
+    let videoStorage = {};
+    setStorage( { videoStorage }, () => {
       ensureSettings({ settings }, callback);
     });
     return;
@@ -181,6 +191,8 @@ function ensureSettings(data, callback) {
   videoStorage = videoStorage === undefined ? {} : videoStorage;
   plStorage = plStorage === undefined ? {} : plStorage;
   const settings = { hideRelated, hideComments, hideEndScreen, enableContentBlocking, allowedVideos, allowedPlaylists, videoStorage, plStorage };
+  //update storage use to new set function
+
   chrome.storage.sync.set( { settings }, () => {
     callback();
   });
@@ -206,19 +218,17 @@ function vidOrPL(url) {
 }
 
 function getStorage(key, callback) {
-  if (key === 'settings') {
-    chrome.storage.sync.get(key, callback);
-  } else {
-    //chrome.local
-    chrome.storage.local.get(key, callback);
-  }
+  const storage = (key === 'settings' ? chrome.storage.sync : chrome.storage.local);
+  let promise = new Promise(resolve => {
+    storage.get(key, (data) => resolve(data));
+  });
+  return (callback ? promise.then(callback) : promise);
 }
 
 function setStorage(key, object, callback) {
-  if (key === 'settings') {
-    chrome.storage.sync.set({ key: object }, callback);
-  } else {
-    //chrome.local
-    chrome.storage.local.set(key, callback);
-  }
+  const storage = (key === 'settings' ? chrome.storage.sync : chrome.storage.local);
+  let promise = new Promise(resolve => {
+    storage.set({ [key]: object }, () => resolve());
+  });
+  return (callback ? promise.then(callback) : promise);
 }
