@@ -201,17 +201,28 @@ function ensureSettings(data, callback) {
   let oldPLStorage = data.plStorage || {};
   if (data.settings === undefined) {
     let settings = {};
-    setStorage( { settings }, () => {
-      ensureSettings({ settings }, callback);
+    setStorage('settings', { settings }, data => {
+      oldSettings = data.settings;
     });
-    return;
-  } else if (data.videoStorage === undefined) {
-    let videoStorage = {};
-    setStorage( { videoStorage }, () => {
-      ensureSettings({ settings }, callback);
-    });
-    return;
   }
+  if (data.videoStorage === undefined) {
+    let videoStorage = {};
+    setStorage( { videoStorage }, data => {
+      oldVideoStorage = data.videoStorage;
+    });
+  }
+  if (data.plStorage === undefined) {
+    let plStorage = {};
+    setStorage('plStorage', { plStorage }, data => {
+      oldPLStorage = data.plStorage;
+    });
+  }
+  //do some promises that will take care of the undefined settings/storage data
+  //have a callback that will handle
+
+  //the purpose of this is to get everything defaulted to at least an empty object
+
+
   let { hideRelated, hideComments, hideEndScreen, enableContentBlocking, allowedVideos, allowedPlaylists, videoStorage, plStorage } = oldSettings;
   hideRelated = Boolean(hideRelated);
   hideComments = Boolean(hideComments);
@@ -224,7 +235,7 @@ function ensureSettings(data, callback) {
   const settings = { hideRelated, hideComments, hideEndScreen, enableContentBlocking, allowedVideos, allowedPlaylists, videoStorage, plStorage };
   //update storage use to new set function
 
-  chrome.storage.sync.set( { settings }, () => {
+  setStorage('settings', { settings }, data => {
     callback();
   });
 }
@@ -259,7 +270,9 @@ function getStorage(key, callback) {
 function setStorage(key, object, callback) {
   const storage = (key === 'settings' ? chrome.storage.sync : chrome.storage.local);
   let promise = new Promise(resolve => {
-    storage.set({ [key]: object }, () => resolve());
+    storage.set({ [key]: object }, () => {
+      storage.get('key', data => resolve(data));
+    });
   });
   return (callback ? promise.then(callback) : promise);
 }
