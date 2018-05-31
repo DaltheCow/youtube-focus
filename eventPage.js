@@ -73,23 +73,56 @@ chrome.tabs.query({}, function(tabs) {
   });
 });
 
-chrome.storage.sync.get('settings', function(data) {
-  ensureSettings(data, () => {
-    if (data.settings.enableContentBlocking) {
-      chrome.tabs.query({}, function(tabs) {
-        const regex = /https:\/\/www.youtube.com\/*/;
-        const ytTabs = Array.from(tabs)
-        .filter(tab => regex.test(tab.url));
-        ytTabs.forEach(tab => {
-          blockContent(tab.id, tab.url, data.settings.allowedVideos, data.settings.allowedPlaylists);
+(function() {
+  let data = {};
+  getStorage('settings')
+  .then(settingsData => {
+    data = Object.assign(data, settingsData);
+    return getStorage('videoStorage');
+  })
+  .then(videoStorageData => {
+    data = Object.assign(data, videoStorageData);
+    return getStorage('plStorage');
+  })
+  .then(plStorageData => {
+    data = Object.assign(data, plStorageData);
+    //test to make sure ensure settings works I guess
+    ensureSettings(data, () => {
+      if (data.settings.enableContentBlocking) {
+        chrome.tabs.query({}, function(tabs) {
+          const regex = /https:\/\/www.youtube.com\/*/;
+          const ytTabs = Array.from(tabs)
+          .filter(tab => regex.test(tab.url));
+          ytTabs.forEach(tab => {
+            blockContent(tab.id, tab.url, data.settings.allowedVideos, data.settings.allowedPlaylists);
+          });
         });
+      }
+      ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
+        sendStateToContent(data.settings[field], field);
       });
-    }
-    ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
-      sendStateToContent(data.settings[field], field);
     });
   });
-});
+
+})();
+//
+// chrome.storage.sync.get('settings', function(data) {
+//   ensureSettings(data, () => {
+//     if (data.settings.enableContentBlocking) {
+//       chrome.tabs.query({}, function(tabs) {
+//         const regex = /https:\/\/www.youtube.com\/*/;
+//         const ytTabs = Array.from(tabs)
+//         .filter(tab => regex.test(tab.url));
+//         ytTabs.forEach(tab => {
+//           blockContent(tab.id, tab.url, data.settings.allowedVideos, data.settings.allowedPlaylists);
+//         });
+//       });
+//     }
+//     ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
+//       sendStateToContent(data.settings[field], field);
+//     });
+//   });
+// });
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
   const ytRegex = /https:\/\/www.youtube.com\/*/;
@@ -110,8 +143,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
 
   }
 });
-
-
 
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
