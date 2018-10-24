@@ -1,15 +1,9 @@
 import React, { Component } from 'react';
 import { render } from 'react-dom';
-
-const vidOrPL = (url) => {
-  const regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&t=[^&]+)?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
-
-  const res = url.match(regex);
-  return { isPL: Boolean(res[1] || res[7]),
-           PlID: res[2] || res[8],
-           isVid: Boolean((res[3] && res[4])),
-           vidID: res[4] };
-}
+import { log } from '../modules/logger';
+import { VID_PL_REGEX } from "../constants";
+import { getStorage } from "../modules/storage";
+import { vidOrPL } from "../util";
 
 class App extends Component {
   constructor(props) {
@@ -30,7 +24,7 @@ class App extends Component {
   }
 
   addVidPL = () => {
-    chrome.storage.sync.get('settings', data => {
+    getStorage('settings', data => {
       let { allowedVideos, allowedPlaylists } = data.settings;
 
       const { isPL, PlID, isVid, vidID } = this;

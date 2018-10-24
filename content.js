@@ -1,6 +1,6 @@
 chrome.runtime.sendMessage({ action: 'showPageAction' });
 chrome.runtime.sendMessage({ action: 'getState' });
-
+debugger
 
 chrome.runtime.onMessage.addListener(data => {
     switch(data.action) {

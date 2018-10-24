@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 27);
+/******/ 	return __webpack_require__(__webpack_require__.s = 28);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -18242,8 +18242,60 @@ function camelize(string) {
 module.exports = camelize;
 
 /***/ }),
-/* 26 */,
-/* 27 */
+/* 26 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+const getStorage = (key, callback) => {
+  const storage = (key === 'settings' ? chrome.storage.sync : chrome.storage.local);
+  let promise = new Promise(resolve => {
+    storage.get(key, (data) => resolve(data));
+  });
+  return (callback ? promise.then(callback) : promise);
+};
+/* harmony export (immutable) */ __webpack_exports__["getStorage"] = getStorage;
+
+
+const setStorage = (key, object, callback) => {
+  const storage = (key === 'settings' ? chrome.storage.sync : chrome.storage.local);
+  let promise = new Promise(resolve => {
+    storage.set(object, () => {
+      storage.get(key, data => {
+        return resolve(data);
+      });
+    });
+  });
+  return (callback ? promise.then(callback) : promise);
+};
+/* harmony export (immutable) */ __webpack_exports__["setStorage"] = setStorage;
+
+
+const getStorageAll = (keys, callback) => {
+  const storagesKeys = keys.map(key => {
+    return { key, storage: chrome.storage[(key === 'settings' ? 'sync' : 'local')] };
+  });
+  let promise = Promise.all(storagesKeys.map(storageKey => {
+    const { storage, key } = storageKey;
+    return new Promise(resolve => {
+      storage.get(key, (data) => resolve(data));
+    });
+  })).then(res => {
+    const data = {};
+    res.forEach((item, idx) => data[keys[idx]] = item[keys[idx]]);
+    return data;
+  });
+  return (callback ? promise.then(callback) : promise);
+};
+/* harmony export (immutable) */ __webpack_exports__["getStorageAll"] = getStorageAll;
+
+
+// need a function that gets as many objects as given keys for async so that i have access to everything without promises
+
+
+/***/ }),
+/* 27 */,
+/* 28 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18257,13 +18309,15 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = __webpack_require__(17);
 
-var _VideoLinkItem = __webpack_require__(28);
+var _VideoLinkItem = __webpack_require__(29);
 
 var _VideoLinkItem2 = _interopRequireDefault(_VideoLinkItem);
 
-var _linkList = __webpack_require__(29);
+var _linkList = __webpack_require__(30);
 
 var _linkList2 = _interopRequireDefault(_linkList);
+
+var _storage = __webpack_require__(26);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18284,23 +18338,21 @@ var App = function (_Component) {
     var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
     _this.componentDidMount = function () {
-      chrome.storage.sync.get('settings', function (data) {
-        var _data$settings = data.settings,
-            allowedVideos = _data$settings.allowedVideos,
-            allowedPlaylists = _data$settings.allowedPlaylists,
-            videoStorage = _data$settings.videoStorage,
-            plStorage = _data$settings.plStorage,
-            hideRelated = _data$settings.hideRelated,
-            hideComments = _data$settings.hideComments,
-            hideEndScreen = _data$settings.hideEndScreen,
-            enableContentBlocking = _data$settings.enableContentBlocking;
-        // console.log('initial video size');
-        // console.log(JSON.stringify(videoStorage).length);
-        // console.log('initial pl size');
-        // console.log(JSON.stringify(plStorage).length);
+      (0, _storage.getStorageAll)(['settings', 'videoStorage', 'plStorage']).then(function (data) {
+        var settings = data.settings,
+            videoStorage = data.videoStorage,
+            plStorage = data.plStorage;
+        var allowedVideos = settings.allowedVideos,
+            allowedPlaylists = settings.allowedPlaylists,
+            hideRelated = settings.hideRelated,
+            hideComments = settings.hideComments,
+            hideEndScreen = settings.hideEndScreen,
+            enableContentBlocking = settings.enableContentBlocking;
+
 
         _this.setState({ allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, videoStorage: videoStorage, plStorage: plStorage, hideRelated: hideRelated, hideComments: hideComments, hideEndScreen: hideEndScreen, enableContentBlocking: enableContentBlocking, loaded: true });
       });
+
       chrome.storage.onChanged.addListener(function (changes, namespace) {
         var _changes$settings = changes.settings,
             oldValue = _changes$settings.oldValue,
@@ -18314,21 +18366,24 @@ var App = function (_Component) {
       });
     };
 
-    _this.toggle = function (field_name) {
+    _this.onToggle = function (field_name) {
       var field = _this.state[field_name];
-      var settings = Object.assign({}, _this.state, _defineProperty({}, field_name, !field));
-      chrome.storage.sync.set({ settings: settings }, function () {
-        _this.setState(_defineProperty({}, field_name, !field));
+      (0, _storage.getStorage)('settings', function (data) {
+        var settings = Object.assign(data.settings, _defineProperty({}, field_name, !field));
+        (0, _storage.setStorage)('settings', { settings: settings }, function () {
+          _this.setState(_defineProperty({}, field_name, !field));
+        });
       });
     };
 
-    _this.deleteLink = function (listType, id) {
-      chrome.storage.sync.get('settings', function (data) {
-        var _data$settings2 = data.settings,
-            allowedVideos = _data$settings2.allowedVideos,
-            allowedPlaylists = _data$settings2.allowedPlaylists,
-            videoStorage = _data$settings2.videoStorage,
-            plStorage = _data$settings2.plStorage;
+    _this.onDeleteLink = function (listType, id) {
+      (0, _storage.getStorageAll)(['settings', 'videoStorage', 'plStorage']).then(function (data) {
+        var settings = data.settings,
+            videoStorage = data.videoStorage,
+            plStorage = data.plStorage;
+        var _settings = settings,
+            allowedVideos = _settings.allowedVideos,
+            allowedPlaylists = _settings.allowedPlaylists;
 
 
         if (listType === 'pl') {
@@ -18342,8 +18397,10 @@ var App = function (_Component) {
           });
           delete videoStorage[id];
         }
-        var settings = Object.assign({}, data.settings, { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists, videoStorage: videoStorage, plStorage: plStorage });
-        chrome.storage.sync.set({ settings: settings });
+        settings = Object.assign({}, data.settings, { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists });
+        (0, _storage.setStorage)('plStorage', { plStorage: plStorage });
+        (0, _storage.setStorage)('videoStorage', { videoStorage: videoStorage });
+        (0, _storage.setStorage)('settings', { settings: settings });
       });
     };
 
@@ -18382,7 +18439,7 @@ var App = function (_Component) {
                   'SHOW'
                 ),
                 _react2.default.createElement('div', { onClick: function onClick() {
-                    return _this.toggle('hideRelated');
+                    return _this.onToggle('hideRelated');
                   }, className: 'switcher_slider' + (hideRelated ? " checked" : "") }),
                 _react2.default.createElement(
                   'div',
@@ -18404,7 +18461,7 @@ var App = function (_Component) {
                   'SHOW'
                 ),
                 _react2.default.createElement('div', { onClick: function onClick() {
-                    return _this.toggle('hideComments');
+                    return _this.onToggle('hideComments');
                   }, className: 'switcher_slider' + (hideComments ? " checked" : "") }),
                 _react2.default.createElement(
                   'div',
@@ -18426,7 +18483,7 @@ var App = function (_Component) {
                   'SHOW'
                 ),
                 _react2.default.createElement('div', { onClick: function onClick() {
-                    return _this.toggle('hideEndScreen');
+                    return _this.onToggle('hideEndScreen');
                   }, className: 'switcher_slider' + (hideEndScreen ? " checked" : "") }),
                 _react2.default.createElement(
                   'div',
@@ -18448,7 +18505,7 @@ var App = function (_Component) {
                   'OFF'
                 ),
                 _react2.default.createElement('div', { onClick: function onClick() {
-                    return _this.toggle('enableContentBlocking');
+                    return _this.onToggle('enableContentBlocking');
                   }, className: 'switcher_slider' + (enableContentBlocking ? " checked" : "") }),
                 _react2.default.createElement(
                   'div',
@@ -18491,7 +18548,7 @@ var App = function (_Component) {
                           return _this.setState({ vidHoverIdx: undefined });
                         },
                         onClick: function onClick() {
-                          return _this.deleteLink('vid', vidId);
+                          return _this.onDeleteLink('vid', vidId);
                         } },
                       _react2.default.createElement('i', { className: 'far fa-times-circle' })
                     ),
@@ -18534,7 +18591,7 @@ var App = function (_Component) {
                           return _this.setState({ plHoverIdx: undefined });
                         },
                         onClick: function onClick() {
-                          return _this.deleteLink('pl', PlID);
+                          return _this.onDeleteLink('pl', PlID);
                         } },
                       _react2.default.createElement('i', { className: 'far fa-times-circle' })
                     )
@@ -18545,9 +18602,9 @@ var App = function (_Component) {
             _react2.default.createElement(
               _linkList2.default,
               null,
-              allowedVideos.map(function (id) {
+              allowedVideos.map(function (id, i) {
                 var vidInfo = videoStorage[id];
-                return _react2.default.createElement(_VideoLinkItem2.default, _extends({}, vidInfo, { id: id }));
+                return _react2.default.createElement(_VideoLinkItem2.default, _extends({ key: i }, vidInfo, { id: id }));
               })
             )
           )
@@ -18565,7 +18622,7 @@ var App = function (_Component) {
 (0, _reactDom.render)(_react2.default.createElement(App, null), document.getElementById('root'));
 
 /***/ }),
-/* 28 */
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18625,7 +18682,7 @@ var VideoLinkItem = function VideoLinkItem(props) {
 exports.default = VideoLinkItem;
 
 /***/ }),
-/* 29 */
+/* 30 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18677,3 +18734,4 @@ exports.default = LinkList;
 
 /***/ })
 /******/ ]);
+//# sourceMappingURL=options.js.map

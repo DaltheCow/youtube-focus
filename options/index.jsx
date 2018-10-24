@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { render } from 'react-dom';
 import VideoLinkItem from '../components/VideoLinkItem.jsx';
 import LinkList from '../components/linkList.jsx';
+import { getStorage, setStorage, getStorageAll } from "../modules/storage";
 
 class App extends Component {
   constructor(props) {
@@ -10,14 +11,14 @@ class App extends Component {
   }
 
   componentDidMount = () => {
-    chrome.storage.sync.get('settings', data => {
-      let { allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = data.settings;
-      // console.log('initial video size');
-      // console.log(JSON.stringify(videoStorage).length);
-      // console.log('initial pl size');
-      // console.log(JSON.stringify(plStorage).length);
+    getStorageAll(['settings', 'videoStorage', 'plStorage'])
+    .then(data => {
+      const { settings, videoStorage, plStorage } = data;
+      const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = settings;
+
       this.setState({ allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking, loaded: true });
     });
+
     chrome.storage.onChanged.addListener((changes, namespace) => {
       const { oldValue, newValue } = changes.settings;
       const fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'enableContentBlocking', 'allowedVideos', 'allowedPlaylists', 'videoStorage', 'plStorage'];
@@ -28,28 +29,34 @@ class App extends Component {
     });
   }
 
-  toggle = (field_name) => {
+  onToggle = (field_name) => {
     const field = this.state[field_name];
-    const settings = Object.assign({}, this.state, { [field_name]: !field } )
-    chrome.storage.sync.set({ settings }, () => {
-      this.setState({ [field_name]: !field });
-    });
+    getStorage('settings', data => {
+      const settings = Object.assign(data.settings, { [field_name]: !field });
+      setStorage('settings', { settings }, () => {
+        this.setState({ [field_name]: !field });
+      });
+    })
   }
 
-  deleteLink = (listType, id) => {
-    chrome.storage.sync.get('settings', data => {
-      let { allowedVideos, allowedPlaylists, videoStorage, plStorage } = data.settings;
+  onDeleteLink = (listType, id) => {
+    getStorageAll(['settings', 'videoStorage', 'plStorage'])
+      .then(data => {
+        let { settings, videoStorage, plStorage } = data;
+        let { allowedVideos, allowedPlaylists } = settings;
 
-      if (listType === 'pl') {
-        allowedPlaylists = allowedPlaylists.filter(PlID => PlID !== id);
-        delete plStorage[id];
-      } else {
-        allowedVideos = allowedVideos.filter(vidID => vidID !== id);
-        delete videoStorage[id];
-      }
-      const settings = Object.assign({}, data.settings, { allowedVideos, allowedPlaylists, videoStorage, plStorage });
-      chrome.storage.sync.set({ settings });
-    });
+        if (listType === 'pl') {
+          allowedPlaylists = allowedPlaylists.filter(PlID => PlID !== id);
+          delete plStorage[id];
+        } else {
+          allowedVideos = allowedVideos.filter(vidID => vidID !== id);
+          delete videoStorage[id];
+        }
+        settings = Object.assign({}, data.settings, { allowedVideos, allowedPlaylists });
+        setStorage('plStorage', { plStorage });
+        setStorage('videoStorage', { videoStorage });
+        setStorage('settings', { settings });
+      });
   }
 
   render = () => {
@@ -63,7 +70,7 @@ class App extends Component {
               Related Videos:
               <div className="switch">
                 <div className="switch-show">SHOW</div>
-                <div onClick={ () => this.toggle('hideRelated') } className={`switcher_slider${hideRelated ? " checked" : ""}`}></div>
+                <div onClick={ () => this.onToggle('hideRelated') } className={`switcher_slider${hideRelated ? " checked" : ""}`}></div>
                 <div className="switch-hide">HIDE</div>
               </div>
             </div>
@@ -72,7 +79,7 @@ class App extends Component {
               Comments:
               <div className="switch">
                 <div className="switch-show">SHOW</div>
-                <div onClick={ () => this.toggle('hideComments') } className={`switcher_slider${hideComments ? " checked" : ""}`}></div>
+                <div onClick={ () => this.onToggle('hideComments') } className={`switcher_slider${hideComments ? " checked" : ""}`}></div>
                 <div className="switch-hide">HIDE</div>
               </div>
             </div>
@@ -81,7 +88,7 @@ class App extends Component {
               End Screen Videos:
               <div className="switch">
                 <div className="switch-show">SHOW</div>
-                <div onClick={ () => this.toggle('hideEndScreen') } className={`switcher_slider${hideEndScreen ? " checked" : ""}`}></div>
+                <div onClick={ () => this.onToggle('hideEndScreen') } className={`switcher_slider${hideEndScreen ? " checked" : ""}`}></div>
                 <div className="switch-hide">HIDE</div>
               </div>
             </div>
@@ -90,7 +97,7 @@ class App extends Component {
               Content Restrictions:
               <div className="switch">
                 <div className="switch-show">OFF</div>
-                <div onClick={ () => this.toggle('enableContentBlocking') } className={`switcher_slider${enableContentBlocking ? " checked" : ""}`}></div>
+                <div onClick={ () => this.onToggle('enableContentBlocking') } className={`switcher_slider${enableContentBlocking ? " checked" : ""}`}></div>
                 <div className="switch-hide">ON</div>
               </div>
             </div>
@@ -106,7 +113,7 @@ class App extends Component {
                       <a href={ link }>{ videoStorage[vidId] ? videoStorage[vidId].title : link }</a>
                       <div className="icon-container" onMouseOver={() => this.setState({ vidHoverIdx: i })}
                            onMouseLeave={() => this.setState({ vidHoverIdx: undefined })}
-                           onClick={() => this.deleteLink('vid', vidId)}>
+                           onClick={() => this.onDeleteLink('vid', vidId)}>
                          <i className="far fa-times-circle"></i>
                       </div>
                       <div className="thumbnail-img-container">
@@ -127,7 +134,7 @@ class App extends Component {
                       <a href={ link }>{ plStorage[PlID] ? plStorage[PlID].plName : link }</a>
                         <div className="icon-container" onMouseOver={() => this.setState({plHoverIdx: i})}
                              onMouseLeave={() => this.setState({ plHoverIdx: undefined })}
-                             onClick={() => this.deleteLink('pl', PlID)}>
+                             onClick={() => this.onDeleteLink('pl', PlID)}>
                            <i className="far fa-times-circle"></i>
                         </div>
                     </div>
@@ -136,10 +143,10 @@ class App extends Component {
               }) }
             </div>
             <LinkList>
-              { allowedVideos.map(id => {
+              { allowedVideos.map((id, i) => {
                 const vidInfo = videoStorage[id];
                 return (
-                  <VideoLinkItem { ...vidInfo } id={ id } />
+                  <VideoLinkItem key={i} { ...vidInfo } id={ id } />
                 );
               })}
             </LinkList>

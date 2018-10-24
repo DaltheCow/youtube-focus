@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 26);
+/******/ 	return __webpack_require__(__webpack_require__.s = 27);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -18243,6 +18243,58 @@ module.exports = camelize;
 
 /***/ }),
 /* 26 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+const getStorage = (key, callback) => {
+  const storage = (key === 'settings' ? chrome.storage.sync : chrome.storage.local);
+  let promise = new Promise(resolve => {
+    storage.get(key, (data) => resolve(data));
+  });
+  return (callback ? promise.then(callback) : promise);
+};
+/* harmony export (immutable) */ __webpack_exports__["getStorage"] = getStorage;
+
+
+const setStorage = (key, object, callback) => {
+  const storage = (key === 'settings' ? chrome.storage.sync : chrome.storage.local);
+  let promise = new Promise(resolve => {
+    storage.set(object, () => {
+      storage.get(key, data => {
+        return resolve(data);
+      });
+    });
+  });
+  return (callback ? promise.then(callback) : promise);
+};
+/* harmony export (immutable) */ __webpack_exports__["setStorage"] = setStorage;
+
+
+const getStorageAll = (keys, callback) => {
+  const storagesKeys = keys.map(key => {
+    return { key, storage: chrome.storage[(key === 'settings' ? 'sync' : 'local')] };
+  });
+  let promise = Promise.all(storagesKeys.map(storageKey => {
+    const { storage, key } = storageKey;
+    return new Promise(resolve => {
+      storage.get(key, (data) => resolve(data));
+    });
+  })).then(res => {
+    const data = {};
+    res.forEach((item, idx) => data[keys[idx]] = item[keys[idx]]);
+    return data;
+  });
+  return (callback ? promise.then(callback) : promise);
+};
+/* harmony export (immutable) */ __webpack_exports__["getStorageAll"] = getStorageAll;
+
+
+// need a function that gets as many objects as given keys for async so that i have access to everything without promises
+
+
+/***/ }),
+/* 27 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18256,6 +18308,14 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = __webpack_require__(17);
 
+var _logger = __webpack_require__(33);
+
+var _constants = __webpack_require__(34);
+
+var _storage = __webpack_require__(26);
+
+var _util = __webpack_require__(35);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -18263,16 +18323,6 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 function _possibleConstructorReturn(self, call) { if (!self) { throw new ReferenceError("this hasn't been initialised - super() hasn't been called"); } return call && (typeof call === "object" || typeof call === "function") ? call : self; }
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
-
-var vidOrPL = function vidOrPL(url) {
-  var regex = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&t=[^&]+)?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
-
-  var res = url.match(regex);
-  return { isPL: Boolean(res[1] || res[7]),
-    PlID: res[2] || res[8],
-    isVid: Boolean(res[3] && res[4]),
-    vidID: res[4] };
-};
 
 var App = function (_Component) {
   _inherits(App, _Component);
@@ -18283,7 +18333,7 @@ var App = function (_Component) {
     var _this = _possibleConstructorReturn(this, (App.__proto__ || Object.getPrototypeOf(App)).call(this, props));
 
     _this.addVidPL = function () {
-      chrome.storage.sync.get('settings', function (data) {
+      (0, _storage.getStorage)('settings', function (data) {
         var _data$settings = data.settings,
             allowedVideos = _data$settings.allowedVideos,
             allowedPlaylists = _data$settings.allowedPlaylists;
@@ -18340,7 +18390,7 @@ var App = function (_Component) {
       var _this2 = this;
 
       chrome.tabs.query({ 'active': true, 'currentWindow': true }, function (tabs) {
-        var _vidOrPL = vidOrPL(tabs[0].url),
+        var _vidOrPL = (0, _util.vidOrPL)(tabs[0].url),
             isPL = _vidOrPL.isPL,
             PlID = _vidOrPL.PlID,
             isVid = _vidOrPL.isVid,
@@ -18360,5 +18410,59 @@ var App = function (_Component) {
 
 (0, _reactDom.render)(_react2.default.createElement(App, null), document.getElementById('root'));
 
+/***/ }),
+/* 28 */,
+/* 29 */,
+/* 30 */,
+/* 31 */,
+/* 32 */,
+/* 33 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+const log = (...messages) => {
+  chrome.runtime.sendMessage({ action: 'log', messages });
+};
+/* harmony export (immutable) */ __webpack_exports__["log"] = log;
+
+
+
+/***/ }),
+/* 34 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+const YT_REGEX = /https:\/\/www.youtube.com\/*/;
+/* harmony export (immutable) */ __webpack_exports__["YT_REGEX"] = YT_REGEX;
+
+
+const VID_PL_REGEX = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&t=[^&]+)?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
+/* harmony export (immutable) */ __webpack_exports__["VID_PL_REGEX"] = VID_PL_REGEX;
+
+
+
+/***/ }),
+/* 35 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(34);
+
+
+const vidOrPL = (url) => {
+  const res = url.match(__WEBPACK_IMPORTED_MODULE_0__constants__["VID_PL_REGEX"]);
+  return { isPL: Boolean(res[1] || res[7]),
+           PlID: res[2] || res[8],
+           isVid: Boolean((res[3] && res[4])),
+           vidID: res[4] };
+};
+/* harmony export (immutable) */ __webpack_exports__["vidOrPL"] = vidOrPL;
+
+
+
 /***/ })
 /******/ ]);
+//# sourceMappingURL=popup.js.map
