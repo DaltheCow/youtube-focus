@@ -20,12 +20,20 @@ class App extends Component {
     });
 
     chrome.storage.onChanged.addListener((changes, namespace) => {
-      const { oldValue, newValue } = changes.settings;
-      const fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'enableContentBlocking', 'allowedVideos', 'allowedPlaylists', 'videoStorage', 'plStorage'];
-      while (JSON.stringify(oldValue[fields[0]]) === JSON.stringify(newValue[fields[0]])) {
-        fields.shift();
+      if (changes['settings']) {
+        const { oldValue, newValue } = changes.settings;
+        const fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'enableContentBlocking', 'allowedVideos', 'allowedPlaylists'];
+        while (JSON.stringify(oldValue[fields[0]]) === JSON.stringify(newValue[fields[0]])) {
+          fields.shift();
+        }
+        this.setState({ [fields[0]]: newValue[fields[0]]});
+      } else if (changes['plStorage']) {
+        const { newValue } = changes.plStorage;
+        this.setState({ plStorage: newValue.plStorage });
+      } else if (changes['videoStorage']) {
+        const { newValue } = changes.videoStorage;
+        this.setState({ videoStorage: newValue.videoStorage})
       }
-      this.setState({ [fields[0]]: newValue[fields[0]]});
     });
   }
 

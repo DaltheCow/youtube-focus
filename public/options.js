@@ -18290,8 +18290,6 @@ const getStorageAll = (keys, callback) => {
 /* harmony export (immutable) */ __webpack_exports__["getStorageAll"] = getStorageAll;
 
 
-// need a function that gets as many objects as given keys for async so that i have access to everything without promises
-
 
 /***/ }),
 /* 27 */,
@@ -18354,15 +18352,25 @@ var App = function (_Component) {
       });
 
       chrome.storage.onChanged.addListener(function (changes, namespace) {
-        var _changes$settings = changes.settings,
-            oldValue = _changes$settings.oldValue,
-            newValue = _changes$settings.newValue;
+        if (changes['settings']) {
+          var _changes$settings = changes.settings,
+              oldValue = _changes$settings.oldValue,
+              newValue = _changes$settings.newValue;
 
-        var fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'enableContentBlocking', 'allowedVideos', 'allowedPlaylists', 'videoStorage', 'plStorage'];
-        while (JSON.stringify(oldValue[fields[0]]) === JSON.stringify(newValue[fields[0]])) {
-          fields.shift();
+          var fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'enableContentBlocking', 'allowedVideos', 'allowedPlaylists'];
+          while (JSON.stringify(oldValue[fields[0]]) === JSON.stringify(newValue[fields[0]])) {
+            fields.shift();
+          }
+          _this.setState(_defineProperty({}, fields[0], newValue[fields[0]]));
+        } else if (changes['plStorage']) {
+          var _newValue = changes.plStorage.newValue;
+
+          _this.setState({ plStorage: _newValue.plStorage });
+        } else if (changes['videoStorage']) {
+          var _newValue2 = changes.videoStorage.newValue;
+
+          _this.setState({ videoStorage: _newValue2.videoStorage });
         }
-        _this.setState(_defineProperty({}, fields[0], newValue[fields[0]]));
       });
     };
 

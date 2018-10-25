@@ -113,8 +113,6 @@ const getStorageAll = (keys, callback) => {
 /* harmony export (immutable) */ __webpack_exports__["getStorageAll"] = getStorageAll;
 
 
-// need a function that gets as many objects as given keys for async so that i have access to everything without promises
-
 
 /***/ }),
 
@@ -152,7 +150,7 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
       break;
     }
     case 'getState': {
-      chrome.storage.sync.get('settings', function(data) {
+      Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["getStorage"])('settings', function(data) {
         if (data.settings.enableContentBlocking) {
             blockContent(tabId, url, data.settings.allowedVideos, data.settings.allowedPlaylists);
         }
@@ -167,17 +165,14 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     case 'receiveStorageInfo': {
       const { url, type, vidInfo, plInfo, info } = request;
       const { isPL, PlID, isVid, vidID } = Object(__WEBPACK_IMPORTED_MODULE_2__util__["vidOrPL"])(url);
-        chrome.storage.sync.get('settings', function(data) {
-          let { plStorage, videoStorage } = data.settings;
+        Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["getStorage"])(['plStorage', 'videoStorage'], function(data) {
+          let { plStorage, videoStorage } = data;
           switch(type) {
             case 'receivePL': {
               let newPLStorage = Object.assign({}, plStorage);
               newPLStorage[PlID] = newPLStorage[PlID] || {};
               newPLStorage[PlID] = Object.assign({}, plStorage[PlID], info);
-              const settings = Object.assign({}, data.settings, { plStorage: newPLStorage });
-              console.log(JSON.stringify(settings).length);
-              console.log(settings);
-              chrome.storage.sync.set({ settings });
+              Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["setStorage"])('plStorage', { plStorage: newPLStorage });
               break;
             }
             case 'receivePL2': {
@@ -185,16 +180,15 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
               let newVideoStorage = Object.assign({}, videoStorage);
               newPLStorage[PlID] = Object.assign({}, newPLStorage[PlID], plInfo);
               newVideoStorage[vidID] = Object.assign({}, newVideoStorage[vidID], vidInfo);
-              const settings = Object.assign({}, data.settings, { plStorage: newPLStorage, videoStorage: newVideoStorage });
-              chrome.storage.sync.set({ settings });
+              Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["setStorage"])({ plStorage: newPLStorage });
+              Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["setStorage"])({ videoStorage: newVideoStorage });
               break;
             }
             case 'receiveVideo': {
               let newVideoStorage = Object.assign({}, videoStorage);
               newVideoStorage[vidID] = newVideoStorage[vidID] || {};
               newVideoStorage[vidID] = Object.assign({}, videoStorage[vidID], info);
-              const settings = Object.assign({}, data.settings, { videoStorage: newVideoStorage });
-              chrome.storage.sync.set({ settings });
+              Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["setStorage"])({ videoStorage: newVideoStorage });
             }
           }
         });
@@ -202,9 +196,6 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     }
     case 'log': {
       console.log(request);
-    }
-    case 'testing': {
-      console.log('inleeeeeeeeee');
     }
   }
 });
@@ -219,18 +210,8 @@ chrome.tabs.query({}, function(tabs) {
 });
 
 (function() {
-  let data = {};
-  Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["getStorage"])('settings')
-  .then(settingsData => {
-    data = Object.assign(data, settingsData);
-    return Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["getStorage"])('videoStorage');
-  })
-  .then(videoStorageData => {
-    data = Object.assign(data, videoStorageData);
-    return Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["getStorage"])('plStorage');
-  })
-  .then(plStorageData => {
-    data = Object.assign(data, plStorageData);
+  Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["getStorage"])(['settings', 'videoStorage', 'plStorage'])
+  .then(data => {
     ensureSettings(data, (newData) => {
       if (newData.settings.enableContentBlocking) {
         chrome.tabs.query({}, function(tabs) {
@@ -252,7 +233,7 @@ chrome.tabs.query({}, function(tabs) {
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
   if (changeInfo.url && __WEBPACK_IMPORTED_MODULE_1__constants__["YT_REGEX"].test(changeInfo.url)) {
     const videoRegex = /https:\/\/www.youtube.com\/watch*/;
-    chrome.storage.sync.get('settings', function(data) {
+    Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["getStorage"])('settings', function(data) {
       if (videoRegex.test(changeInfo.url)) {
         ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
           chrome.tabs.sendMessage( tabId, { action: 'hideField', value: data.settings[field], field });

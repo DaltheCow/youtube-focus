@@ -34,5 +34,3 @@ export const getStorageAll = (keys, callback) => {
   });
   return (callback ? promise.then(callback) : promise);
 };
-
-// need a function that gets as many objects as given keys for async so that i have access to everything without promises

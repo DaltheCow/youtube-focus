@@ -18290,8 +18290,6 @@ const getStorageAll = (keys, callback) => {
 /* harmony export (immutable) */ __webpack_exports__["getStorageAll"] = getStorageAll;
 
 
-// need a function that gets as many objects as given keys for async so that i have access to everything without promises
-
 
 /***/ }),
 /* 27 */
