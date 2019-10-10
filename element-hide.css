@@ -1,11 +1,15 @@
 .hide-comments #comments {
-  display: none !important;
+  visibility: hidden !important;
 }
 
 .hide-related #related {
-  display: none !important;
+  visibility: hidden !important;
 }
 
 .hide-end-screen .html5-endscreen {
-  display: none !important;
+  visibility: hidden !important;
+}
+
+.hide-ad-overlay .video-ads.ytp-ad-module {
+  visibility: hidden !important;
 }

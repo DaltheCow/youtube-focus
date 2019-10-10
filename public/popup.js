@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 27);
+/******/ 	return __webpack_require__(__webpack_require__.s = 29);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -18247,6 +18247,21 @@ module.exports = camelize;
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+const YT_REGEX = /https:\/\/www.youtube.com\/*/;
+/* harmony export (immutable) */ __webpack_exports__["YT_REGEX"] = YT_REGEX;
+
+
+const VID_PL_REGEX = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&t=[^&]+)?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
+/* harmony export (immutable) */ __webpack_exports__["VID_PL_REGEX"] = VID_PL_REGEX;
+
+
+
+/***/ }),
+/* 27 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 const getStorage = (key, callback) => {
   const storage = (key === 'settings' ? chrome.storage.sync : chrome.storage.local);
   let promise = new Promise(resolve => {
@@ -18292,7 +18307,27 @@ const getStorageAll = (keys, callback) => {
 
 
 /***/ }),
-/* 27 */
+/* 28 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(26);
+
+
+const vidOrPL = (url) => {
+  const res = url.match(__WEBPACK_IMPORTED_MODULE_0__constants__["VID_PL_REGEX"]);
+  return { isPL: Boolean(res[1] || res[7]),
+           PlID: res[2] || res[8],
+           isVid: Boolean((res[3] && res[4])),
+           vidID: res[4] };
+};
+/* harmony export (immutable) */ __webpack_exports__["vidOrPL"] = vidOrPL;
+
+
+
+/***/ }),
+/* 29 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18306,13 +18341,13 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = __webpack_require__(17);
 
-var _logger = __webpack_require__(33);
+var _logger = __webpack_require__(30);
 
-var _constants = __webpack_require__(34);
+var _constants = __webpack_require__(26);
 
-var _storage = __webpack_require__(26);
+var _storage = __webpack_require__(27);
 
-var _util = __webpack_require__(35);
+var _util = __webpack_require__(28);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18409,12 +18444,7 @@ var App = function (_Component) {
 (0, _reactDom.render)(_react2.default.createElement(App, null), document.getElementById('root'));
 
 /***/ }),
-/* 28 */,
-/* 29 */,
-/* 30 */,
-/* 31 */,
-/* 32 */,
-/* 33 */
+/* 30 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -18423,41 +18453,6 @@ const log = (...messages) => {
   chrome.runtime.sendMessage({ action: 'log', messages });
 };
 /* harmony export (immutable) */ __webpack_exports__["log"] = log;
-
-
-
-/***/ }),
-/* 34 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-const YT_REGEX = /https:\/\/www.youtube.com\/*/;
-/* harmony export (immutable) */ __webpack_exports__["YT_REGEX"] = YT_REGEX;
-
-
-const VID_PL_REGEX = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&t=[^&]+)?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
-/* harmony export (immutable) */ __webpack_exports__["VID_PL_REGEX"] = VID_PL_REGEX;
-
-
-
-/***/ }),
-/* 35 */
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(34);
-
-
-const vidOrPL = (url) => {
-  const res = url.match(__WEBPACK_IMPORTED_MODULE_0__constants__["VID_PL_REGEX"]);
-  return { isPL: Boolean(res[1] || res[7]),
-           PlID: res[2] || res[8],
-           isVid: Boolean((res[3] && res[4])),
-           vidID: res[4] };
-};
-/* harmony export (immutable) */ __webpack_exports__["vidOrPL"] = vidOrPL;
 
 
 

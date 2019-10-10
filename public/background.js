@@ -60,12 +60,28 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 32);
+/******/ 	return __webpack_require__(__webpack_require__.s = 35);
 /******/ })
 /************************************************************************/
 /******/ ({
 
 /***/ 26:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+const YT_REGEX = /https:\/\/www.youtube.com\/*/;
+/* harmony export (immutable) */ __webpack_exports__["YT_REGEX"] = YT_REGEX;
+
+
+const VID_PL_REGEX = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&t=[^&]+)?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
+/* harmony export (immutable) */ __webpack_exports__["VID_PL_REGEX"] = VID_PL_REGEX;
+
+
+
+/***/ }),
+
+/***/ 27:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -116,19 +132,40 @@ const getStorageAll = (keys, callback) => {
 
 /***/ }),
 
-/***/ 32:
+/***/ 28:
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__modules_storage__ = __webpack_require__(26);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(34);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util__ = __webpack_require__(35);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(26);
+
+
+const vidOrPL = (url) => {
+  const res = url.match(__WEBPACK_IMPORTED_MODULE_0__constants__["VID_PL_REGEX"]);
+  return { isPL: Boolean(res[1] || res[7]),
+           PlID: res[2] || res[8],
+           isVid: Boolean((res[3] && res[4])),
+           vidID: res[4] };
+};
+/* harmony export (immutable) */ __webpack_exports__["vidOrPL"] = vidOrPL;
+
+
+
+/***/ }),
+
+/***/ 35:
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__modules_storage__ = __webpack_require__(27);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__constants__ = __webpack_require__(26);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__util__ = __webpack_require__(28);
 
 
 
 
-// chrome.storage.sync.clear(() => console.log("hi"));
+// chrome.storage.sync.clear(() => console.log("cleared"));
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   const tabId = sender.tab.id,
@@ -137,9 +174,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     case 'showPageAction': {
       // need to turn it off when navigating to non valid page, maybe in on tabs updated
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        const isVidOrPl = Object(__WEBPACK_IMPORTED_MODULE_2__util__["vidOrPL"])(tabs[0].url);
-        if (isVidOrPl.isPL || isVidOrPl.isVid) {
-          chrome.pageAction.show(tabs[0].id);
+        if (tabs.length > 0) {
+          const isVidOrPl = Object(__WEBPACK_IMPORTED_MODULE_2__util__["vidOrPL"])(tabs[0].url);
+          if (isVidOrPl.isPL || isVidOrPl.isVid) {
+            chrome.pageAction.show(tabs[0].id);
+          }
         }
       });
       const isVidOrPl = Object(__WEBPACK_IMPORTED_MODULE_2__util__["vidOrPL"])(url);
@@ -180,15 +219,15 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
               let newVideoStorage = Object.assign({}, videoStorage);
               newPLStorage[PlID] = Object.assign({}, newPLStorage[PlID], plInfo);
               newVideoStorage[vidID] = Object.assign({}, newVideoStorage[vidID], vidInfo);
-              Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["setStorage"])({ plStorage: newPLStorage });
-              Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["setStorage"])({ videoStorage: newVideoStorage });
+              Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["setStorage"])('plStorage', { plStorage: newPLStorage });
+              Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["setStorage"])('videoStorage', { videoStorage: newVideoStorage });
               break;
             }
             case 'receiveVideo': {
               let newVideoStorage = Object.assign({}, videoStorage);
               newVideoStorage[vidID] = newVideoStorage[vidID] || {};
               newVideoStorage[vidID] = Object.assign({}, videoStorage[vidID], info);
-              Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["setStorage"])({ videoStorage: newVideoStorage });
+              Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["setStorage"])('videoStorage', { videoStorage: newVideoStorage });
             }
           }
         });
@@ -210,7 +249,7 @@ chrome.tabs.query({}, function(tabs) {
 });
 
 (function() {
-  Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["getStorage"])(['settings', 'videoStorage', 'plStorage'])
+  Object(__WEBPACK_IMPORTED_MODULE_0__modules_storage__["getStorageAll"])(['settings', 'videoStorage', 'plStorage'])
   .then(data => {
     ensureSettings(data, (newData) => {
       if (newData.settings.enableContentBlocking) {
@@ -253,21 +292,40 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
 chrome.storage.onChanged.addListener(function(changes, namespace) {
   if (changes.settings) {
     const { oldValue, newValue } = changes.settings;
+    
     if (oldValue && newValue) {
-      if (oldValue.hideRelated !== newValue.hideRelated) {
-        sendStateToContent(newValue.hideRelated, 'hideRelated');
-      } else if (oldValue.hideComments !== newValue.hideComments) {
-        sendStateToContent(newValue.hideComments, 'hideComments');
-      } else if (oldValue.hideEndScreen !== newValue.hideEndScreen) {
-        sendStateToContent(newValue.hideEndScreen, 'hideEndScreen');
-      } else if (oldValue.enableContentBlocking !== newValue.enableContentBlocking) {
-        if (newValue.enableContentBlocking) {
-          chrome.tabs.query({}, function(tabs) {
-            Array.from(tabs).forEach(tab => {
-              blockContent(tab.id, tab.url, newValue.allowedVideos, newValue.allowedPlaylists);
-            });
+      const {
+        enableContentBlocking: oEnableContentBlocking,
+        allowedVideos: oAllowedVideos,
+        allowedPlaylists: oAllowedPlaylists,
+        hideEndScreen: oHideEndScreen,
+        hideRelated: oHideRelated,
+        hideComments: oHideComments
+      } = oldValue;
+      const {
+        enableContentBlocking: nEnableContentBlocking,
+        allowedVideos: nAllowedVideos,
+        allowedPlaylists: nAllowedPlaylists,
+        hideEndScreen: nHideEndScreen,
+        hideRelated: nHideRelated,
+        hideComments: nHideComments
+      } = newValue;
+      const blockEnabled = !oEnableContentBlocking && nEnableContentBlocking,
+            vidRemoved = oAllowedVideos.length > nAllowedVideos.length,
+            plRemoved = oAllowedPlaylists.length > nAllowedPlaylists.length,
+            blockVids = (blockEnabled) || (nEnableContentBlocking && (vidRemoved || plRemoved));
+      if (oHideRelated !== nHideRelated) {
+        sendStateToContent(nHideRelated, 'hideRelated');
+      } else if (oHideComments !== nHideComments) {
+        sendStateToContent(nHideComments, 'hideComments');
+      } else if (oHideEndScreen !== nHideEndScreen) {
+        sendStateToContent(nHideEndScreen, 'hideEndScreen');
+      } else if (blockVids) {
+        chrome.tabs.query({}, function(tabs) {
+          Array.from(tabs).filter(tab => __WEBPACK_IMPORTED_MODULE_1__constants__["YT_REGEX"].test(tab.url)).forEach(tab => {
+            blockContent(tab.id, tab.url, nAllowedVideos, nAllowedPlaylists);
           });
-        }
+        });
       }
     }
   }
@@ -322,6 +380,14 @@ function updateStorageInfoMsg(tabId, url, allowedVideos, allowedPlaylists) {
   }
 }
 
+function logToContent(text) {
+  const message = { action: 'log', message: text };
+  chrome.tabs.query({}, function(tabs) {
+    Array.from(tabs)
+    .forEach(tab => chrome.tabs.sendMessage(tab.id, message));
+  });
+}
+
 function sendStateToContent(value, field, tabId) {
   var message = { action: 'hideField', value, field };
   if (tabId) {
@@ -340,43 +406,6 @@ function blockContent(tabId, url, allowedVideos, allowedPlaylists) {
     chrome.tabs.update(tabId, {url: 'not_available/not_available.html'});
   }
 }
-
-
-/***/ }),
-
-/***/ 34:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-const YT_REGEX = /https:\/\/www.youtube.com\/*/;
-/* harmony export (immutable) */ __webpack_exports__["YT_REGEX"] = YT_REGEX;
-
-
-const VID_PL_REGEX = /https:\/\/www\.youtube\.com\/(playlist\?list=(.+))?(watch\?v=([A-Za-z0-9_-]{11}))?(&t=[^&]+)?(&index[^&]+)?(&list=([^&]+)?)?(&.*)?/;
-/* harmony export (immutable) */ __webpack_exports__["VID_PL_REGEX"] = VID_PL_REGEX;
-
-
-
-/***/ }),
-
-/***/ 35:
-/***/ (function(module, __webpack_exports__, __webpack_require__) {
-
-"use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__constants__ = __webpack_require__(34);
-
-
-const vidOrPL = (url) => {
-  const res = url.match(__WEBPACK_IMPORTED_MODULE_0__constants__["VID_PL_REGEX"]);
-  return { isPL: Boolean(res[1] || res[7]),
-           PlID: res[2] || res[8],
-           isVid: Boolean((res[3] && res[4])),
-           vidID: res[4] };
-};
-/* harmony export (immutable) */ __webpack_exports__["vidOrPL"] = vidOrPL;
-
 
 
 /***/ })

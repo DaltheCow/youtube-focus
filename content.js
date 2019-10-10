@@ -1,8 +1,13 @@
 chrome.runtime.sendMessage({ action: 'showPageAction' });
 chrome.runtime.sendMessage({ action: 'getState' });
-debugger
+setTimeout(() => document.body.classList.add("hide-ad-overlay"), 10000);
+document.body.classList.add("hide-ad-overlay");
 
+//currently this isn't being hit when i turn hide comments off
 chrome.runtime.onMessage.addListener(data => {
+    if (data.action === "log") {
+      console.log(data.message);
+    }
     switch(data.action) {
       case 'hideField': {
         const regex = /https:\/\/www.youtube.com\/watch*/;
@@ -11,8 +16,10 @@ chrome.runtime.onMessage.addListener(data => {
           const className = legend[data.field];
           if (data.value) {
             document.body.classList.add(className);
+            console.log(`add ${className}`);
           } else {
             document.body.classList.remove(className);
+            console.log(`remove ${className}`);
           }
         }
         break;
@@ -46,19 +53,21 @@ function gatherPLinfo() {
   const numViews = stats[1].innerText;
   const contents = document.querySelectorAll('#contents #contents #contents .style-scope.ytd-playlist-video-list-renderer');
 
-  const plVideos = mapFilter(Array.from(contents), node => {
-    const durationNode = node.querySelector('#thumbnail #overlays .style-scope.ytd-thumbnail-overlay-time-status-renderer');
-    //filter out private videos
-    if (!durationNode) {
-      return undefined;
-    }
-    const duration = durationNode.innerText;
-    const thumbnailImg = node.querySelector('#thumbnail #img').getAttribute('src');
-    const title = node.querySelector('#meta #video-title').innerText;
-    const channel = node.querySelector('#metadata #byline .yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
-    const index = document.querySelector('#contents #contents #index').innerText;
-    return { thumbnailImg, duration, title, channel, index };
-  }, res => res !== undefined);
+  const plVideos = Array.from(contents)
+    .map(node => {
+      const durationNode = node.querySelector('#thumbnail #overlays .style-scope.ytd-thumbnail-overlay-time-status-renderer');
+      //filter out private videos
+      if (!durationNode) {
+        return undefined;
+      }
+      const duration = durationNode.innerText;
+      const thumbnailImg = node.querySelector('#thumbnail #img').getAttribute('src');
+      const title = node.querySelector('#meta #video-title').innerText;
+      const channel = node.querySelector('#metadata #byline .yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
+      const index = document.querySelector('#contents #contents #index').innerText;
+      return { thumbnailImg, duration, title, channel, index };
+    })
+    .filter(res => res !== undefined);
 
   return { plName, numVids, numViews }; //, plVideos };
 }
@@ -72,7 +81,7 @@ function gatherVideoInfo() {
   const title = titleNode.innerText;
   const viewsLong = document.querySelector('#info #count .view-count.style-scope.yt-view-count-renderer').innerText;
   const viewsShort = document.querySelector('#info #count .short-view-count.style-scope.yt-view-count-renderer').innerText;
-  const channel = document.querySelector('#upload-info #owner-container .yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
+  const channel = ""//document.querySelector('#upload-info #owner-container .yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
   const publishDate = document.querySelector('#upload-info .date.style-scope.ytd-video-secondary-info-renderer').innerText;
   let duration = null;
   if (!document.querySelector('#ytd-player .ad-interrupting')) {
@@ -126,16 +135,6 @@ function sendVideoinfo() {
   }, 1000);
 }
 
-
-function mapFilter(arr, func, test) {
-  const newArr = [];
-  arr.forEach(el => {
-    const res = func(el);
-    if (test(res)) newArr.push(res);
-  });
-  return newArr;
-}
-
 function retrieveVideoInfo() {
   function injectScript(file, nodeName) {
     const node = document.getElementsByTagName(nodeName)[0];
@@ -153,10 +152,13 @@ function retrieveVideoInfo() {
       const text = span.innerText;
       const data = JSON.parse(text);
       const { date, title, lengthSeconds, author, shortDescription, channelId, viewCount } = data;
-      const info = { title, viewCount, channel: author, publishDate: date, duration: lengthSeconds, shortDescription, channelId };
+      const parsedDate = date.match(/\w{3}\s\d{1,2},\s\d{1,4}/)[0];
+      const info = { title, viewCount, channel: author, publishDate: parsedDate, duration: lengthSeconds, shortDescription, channelId };
       const url = window.location.href;
       chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type: 'receiveVideo', info, url });
       clearInterval(intvl);
     }
   }, 100);
 }
+
+retrieveVideoInfo();

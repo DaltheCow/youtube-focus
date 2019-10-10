@@ -60,7 +60,7 @@
 /******/ 	__webpack_require__.p = "";
 /******/
 /******/ 	// Load entry module and return exports
-/******/ 	return __webpack_require__(__webpack_require__.s = 28);
+/******/ 	return __webpack_require__(__webpack_require__.s = 31);
 /******/ })
 /************************************************************************/
 /******/ ([
@@ -18242,7 +18242,8 @@ function camelize(string) {
 module.exports = camelize;
 
 /***/ }),
-/* 26 */
+/* 26 */,
+/* 27 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
@@ -18292,8 +18293,10 @@ const getStorageAll = (keys, callback) => {
 
 
 /***/ }),
-/* 27 */,
-/* 28 */
+/* 28 */,
+/* 29 */,
+/* 30 */,
+/* 31 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18307,15 +18310,15 @@ var _react2 = _interopRequireDefault(_react);
 
 var _reactDom = __webpack_require__(17);
 
-var _VideoLinkItem = __webpack_require__(29);
+var _VideoLinkItem = __webpack_require__(32);
 
 var _VideoLinkItem2 = _interopRequireDefault(_VideoLinkItem);
 
-var _linkList = __webpack_require__(30);
+var _linkList = __webpack_require__(33);
 
 var _linkList2 = _interopRequireDefault(_linkList);
 
-var _storage = __webpack_require__(26);
+var _storage = __webpack_require__(27);
 
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
@@ -18337,6 +18340,7 @@ var App = function (_Component) {
 
     _this.componentDidMount = function () {
       (0, _storage.getStorageAll)(['settings', 'videoStorage', 'plStorage']).then(function (data) {
+        console.log(data);
         var settings = data.settings,
             videoStorage = data.videoStorage,
             plStorage = data.plStorage;
@@ -18365,11 +18369,11 @@ var App = function (_Component) {
         } else if (changes['plStorage']) {
           var _newValue = changes.plStorage.newValue;
 
-          _this.setState({ plStorage: _newValue.plStorage });
+          _this.setState({ plStorage: _newValue });
         } else if (changes['videoStorage']) {
           var _newValue2 = changes.videoStorage.newValue;
 
-          _this.setState({ videoStorage: _newValue2.videoStorage });
+          _this.setState({ videoStorage: _newValue2 });
         }
       });
     };
@@ -18406,9 +18410,10 @@ var App = function (_Component) {
           delete videoStorage[id];
         }
         settings = Object.assign({}, data.settings, { allowedVideos: allowedVideos, allowedPlaylists: allowedPlaylists });
-        (0, _storage.setStorage)('plStorage', { plStorage: plStorage });
-        (0, _storage.setStorage)('videoStorage', { videoStorage: videoStorage });
-        (0, _storage.setStorage)('settings', { settings: settings });
+        (0, _storage.setStorage)('settings', { settings: settings }, function () {
+          (0, _storage.setStorage)('plStorage', { plStorage: plStorage });
+          (0, _storage.setStorage)('videoStorage', { videoStorage: videoStorage });
+        });
       });
     };
 
@@ -18545,7 +18550,7 @@ var App = function (_Component) {
                     _react2.default.createElement(
                       'a',
                       { href: link },
-                      videoStorage[vidId] ? videoStorage[vidId].title : link
+                      videoStorage && videoStorage[vidId] ? videoStorage[vidId].title : link
                     ),
                     _react2.default.createElement(
                       'div',
@@ -18588,7 +18593,7 @@ var App = function (_Component) {
                     _react2.default.createElement(
                       'a',
                       { href: link },
-                      plStorage[PlID] ? plStorage[PlID].plName : link
+                      plStorage && plStorage[PlID] ? plStorage[PlID].plName : link
                     ),
                     _react2.default.createElement(
                       'div',
@@ -18630,7 +18635,7 @@ var App = function (_Component) {
 (0, _reactDom.render)(_react2.default.createElement(App, null), document.getElementById('root'));
 
 /***/ }),
-/* 29 */
+/* 32 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";
@@ -18690,7 +18695,7 @@ var VideoLinkItem = function VideoLinkItem(props) {
 exports.default = VideoLinkItem;
 
 /***/ }),
-/* 30 */
+/* 33 */
 /***/ (function(module, exports, __webpack_require__) {
 
 "use strict";

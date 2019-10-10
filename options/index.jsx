@@ -13,6 +13,7 @@ class App extends Component {
   componentDidMount = () => {
     getStorageAll(['settings', 'videoStorage', 'plStorage'])
     .then(data => {
+      console.log(data);
       const { settings, videoStorage, plStorage } = data;
       const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = settings;
 
@@ -29,10 +30,10 @@ class App extends Component {
         this.setState({ [fields[0]]: newValue[fields[0]]});
       } else if (changes['plStorage']) {
         const { newValue } = changes.plStorage;
-        this.setState({ plStorage: newValue.plStorage });
+        this.setState({ plStorage: newValue });
       } else if (changes['videoStorage']) {
         const { newValue } = changes.videoStorage;
-        this.setState({ videoStorage: newValue.videoStorage})
+        this.setState({ videoStorage: newValue})
       }
     });
   }
@@ -61,9 +62,10 @@ class App extends Component {
           delete videoStorage[id];
         }
         settings = Object.assign({}, data.settings, { allowedVideos, allowedPlaylists });
-        setStorage('plStorage', { plStorage });
-        setStorage('videoStorage', { videoStorage });
-        setStorage('settings', { settings });
+        setStorage('settings', { settings }, () => {
+          setStorage('plStorage', { plStorage });
+          setStorage('videoStorage', { videoStorage });
+        });
       });
   }
 
@@ -118,7 +120,7 @@ class App extends Component {
                 return (
                   <div key={i} className="link-item-container">
                     <div className="link-item">
-                      <a href={ link }>{ videoStorage[vidId] ? videoStorage[vidId].title : link }</a>
+                      <a href={ link }>{ (videoStorage && videoStorage[vidId]) ? videoStorage[vidId].title : link }</a>
                       <div className="icon-container" onMouseOver={() => this.setState({ vidHoverIdx: i })}
                            onMouseLeave={() => this.setState({ vidHoverIdx: undefined })}
                            onClick={() => this.onDeleteLink('vid', vidId)}>
@@ -139,7 +141,7 @@ class App extends Component {
                 return (
                   <div key={i} className="link-item-container">
                     <div className="link-item">
-                      <a href={ link }>{ plStorage[PlID] ? plStorage[PlID].plName : link }</a>
+                      <a href={ link }>{ (plStorage && plStorage[PlID]) ? plStorage[PlID].plName : link }</a>
                         <div className="icon-container" onMouseOver={() => this.setState({plHoverIdx: i})}
                              onMouseLeave={() => this.setState({ plHoverIdx: undefined })}
                              onClick={() => this.onDeleteLink('pl', PlID)}>

@@ -1,8 +1,8 @@
-import { getStorage, setStorage } from "../modules/storage";
+import { getStorage, setStorage, getStorageAll } from "../modules/storage";
 import { YT_REGEX, VID_PL_REGEX } from "../constants";
 import { vidOrPL } from "../util";
 
-// chrome.storage.sync.clear(() => console.log("hi"));
+// chrome.storage.sync.clear(() => console.log("cleared"));
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   const tabId = sender.tab.id,
@@ -11,9 +11,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
     case 'showPageAction': {
       // need to turn it off when navigating to non valid page, maybe in on tabs updated
       chrome.tabs.query({active: true, currentWindow: true}, function(tabs) {
-        const isVidOrPl = vidOrPL(tabs[0].url);
-        if (isVidOrPl.isPL || isVidOrPl.isVid) {
-          chrome.pageAction.show(tabs[0].id);
+        if (tabs.length > 0) {
+          const isVidOrPl = vidOrPL(tabs[0].url);
+          if (isVidOrPl.isPL || isVidOrPl.isVid) {
+            chrome.pageAction.show(tabs[0].id);
+          }
         }
       });
       const isVidOrPl = vidOrPL(url);
@@ -54,15 +56,15 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
               let newVideoStorage = Object.assign({}, videoStorage);
               newPLStorage[PlID] = Object.assign({}, newPLStorage[PlID], plInfo);
               newVideoStorage[vidID] = Object.assign({}, newVideoStorage[vidID], vidInfo);
-              setStorage({ plStorage: newPLStorage });
-              setStorage({ videoStorage: newVideoStorage });
+              setStorage('plStorage', { plStorage: newPLStorage });
+              setStorage('videoStorage', { videoStorage: newVideoStorage });
               break;
             }
             case 'receiveVideo': {
               let newVideoStorage = Object.assign({}, videoStorage);
               newVideoStorage[vidID] = newVideoStorage[vidID] || {};
               newVideoStorage[vidID] = Object.assign({}, videoStorage[vidID], info);
-              setStorage({ videoStorage: newVideoStorage });
+              setStorage('videoStorage', { videoStorage: newVideoStorage });
             }
           }
         });
@@ -84,7 +86,7 @@ chrome.tabs.query({}, function(tabs) {
 });
 
 (function() {
-  getStorage(['settings', 'videoStorage', 'plStorage'])
+  getStorageAll(['settings', 'videoStorage', 'plStorage'])
   .then(data => {
     ensureSettings(data, (newData) => {
       if (newData.settings.enableContentBlocking) {
@@ -127,21 +129,40 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
 chrome.storage.onChanged.addListener(function(changes, namespace) {
   if (changes.settings) {
     const { oldValue, newValue } = changes.settings;
+    
     if (oldValue && newValue) {
-      if (oldValue.hideRelated !== newValue.hideRelated) {
-        sendStateToContent(newValue.hideRelated, 'hideRelated');
-      } else if (oldValue.hideComments !== newValue.hideComments) {
-        sendStateToContent(newValue.hideComments, 'hideComments');
-      } else if (oldValue.hideEndScreen !== newValue.hideEndScreen) {
-        sendStateToContent(newValue.hideEndScreen, 'hideEndScreen');
-      } else if (oldValue.enableContentBlocking !== newValue.enableContentBlocking) {
-        if (newValue.enableContentBlocking) {
-          chrome.tabs.query({}, function(tabs) {
-            Array.from(tabs).forEach(tab => {
-              blockContent(tab.id, tab.url, newValue.allowedVideos, newValue.allowedPlaylists);
-            });
+      const {
+        enableContentBlocking: oEnableContentBlocking,
+        allowedVideos: oAllowedVideos,
+        allowedPlaylists: oAllowedPlaylists,
+        hideEndScreen: oHideEndScreen,
+        hideRelated: oHideRelated,
+        hideComments: oHideComments
+      } = oldValue;
+      const {
+        enableContentBlocking: nEnableContentBlocking,
+        allowedVideos: nAllowedVideos,
+        allowedPlaylists: nAllowedPlaylists,
+        hideEndScreen: nHideEndScreen,
+        hideRelated: nHideRelated,
+        hideComments: nHideComments
+      } = newValue;
+      const blockEnabled = !oEnableContentBlocking && nEnableContentBlocking,
+            vidRemoved = oAllowedVideos.length > nAllowedVideos.length,
+            plRemoved = oAllowedPlaylists.length > nAllowedPlaylists.length,
+            blockVids = (blockEnabled) || (nEnableContentBlocking && (vidRemoved || plRemoved));
+      if (oHideRelated !== nHideRelated) {
+        sendStateToContent(nHideRelated, 'hideRelated');
+      } else if (oHideComments !== nHideComments) {
+        sendStateToContent(nHideComments, 'hideComments');
+      } else if (oHideEndScreen !== nHideEndScreen) {
+        sendStateToContent(nHideEndScreen, 'hideEndScreen');
+      } else if (blockVids) {
+        chrome.tabs.query({}, function(tabs) {
+          Array.from(tabs).filter(tab => YT_REGEX.test(tab.url)).forEach(tab => {
+            blockContent(tab.id, tab.url, nAllowedVideos, nAllowedPlaylists);
           });
-        }
+        });
       }
     }
   }
@@ -194,6 +215,14 @@ function updateStorageInfoMsg(tabId, url, allowedVideos, allowedPlaylists) {
     }
 
   }
+}
+
+function logToContent(text) {
+  const message = { action: 'log', message: text };
+  chrome.tabs.query({}, function(tabs) {
+    Array.from(tabs)
+    .forEach(tab => chrome.tabs.sendMessage(tab.id, message));
+  });
 }
 
 function sendStateToContent(value, field, tabId) {
