@@ -9,7 +9,3 @@
 .hide-end-screen .html5-endscreen {
   visibility: hidden !important;
 }
-
-.hide-ad-overlay .video-ads.ytp-ad-module {
-  visibility: hidden !important;
-}

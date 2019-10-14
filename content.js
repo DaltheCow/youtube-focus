@@ -1,13 +1,7 @@
 chrome.runtime.sendMessage({ action: 'showPageAction' });
 chrome.runtime.sendMessage({ action: 'getState' });
-setTimeout(() => document.body.classList.add("hide-ad-overlay"), 10000);
-document.body.classList.add("hide-ad-overlay");
 
-//currently this isn't being hit when i turn hide comments off
 chrome.runtime.onMessage.addListener(data => {
-    if (data.action === "log") {
-      console.log(data.message);
-    }
     switch(data.action) {
       case 'hideField': {
         const regex = /https:\/\/www.youtube.com\/watch*/;
@@ -23,6 +17,14 @@ chrome.runtime.onMessage.addListener(data => {
           }
         }
         break;
+      }
+      case 'showButton': {
+        //TODO: add the code to create and show the add yt focus button
+        //on hover it should have an option to add video or playlist
+        //eventually maybe add channel too
+      }
+      case 'log': {
+        console.log(data.message);
       }
       case 'gatherVideoInfo': {
         sendVideoinfo();
@@ -161,4 +163,4 @@ function retrieveVideoInfo() {
   }, 100);
 }
 
-retrieveVideoInfo();
+// retrieveVideoInfo();

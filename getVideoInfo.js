@@ -1,5 +1,4 @@
 const intvl = setInterval(() => {
-  // debugger
   if (window.ytInitialData && window.ytInitialPlayerResponse) {
     clearInterval(intvl);
     try {
