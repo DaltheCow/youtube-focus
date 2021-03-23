@@ -2,7 +2,6 @@ import React from 'react';
 
 const VideoLinkItem = (props) => {
   let { id, title, viewsShort, viewsLong, channel, publishDate, duration } = props;
-  console.log(props);
   duration = !duration ? null : (
     <div className="duration-container">
       { duration }

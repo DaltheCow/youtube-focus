@@ -108,6 +108,15 @@ chrome.tabs.query({}, function(tabs) {
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
   if (changeInfo.url && YT_REGEX.test(changeInfo.url)) {
+    // make sure the pop up is only available for the correct pages
+    const info = vidOrPL(changeInfo.url);
+    if (info.isPL || info.isVid) {
+      chrome.pageAction.show(tabId);
+    } else {
+      chrome.pageAction.hide(tabId);
+
+    }
+    
     const videoRegex = /https:\/\/www.youtube.com\/watch*/;
     getStorage('settings', function(data) {
       if (videoRegex.test(changeInfo.url)) {

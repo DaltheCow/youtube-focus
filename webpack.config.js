@@ -11,10 +11,28 @@ module.exports = {
     path: resolve('./public'),
     filename: '[name].js'
   },
+  resolve: {
+    extensions: ['.js', '.jsx'],
+  },
   module: {
-    loaders: [
-      { test: /\.jsx$/, loaders: ['babel-loader'], exclude: /node_modules/ }
+    rules: [
+      {
+        test: /\.js?$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+        query: {
+            presets: ['@babel/preset-env', '@babel/preset-react'],
+        },
+    },
+    {
+        test: /\.jsx?$/,
+        exclude: /node_modules/,
+        loader: 'babel-loader',
+        query: {
+            presets: ['@babel/preset-env', '@babel/preset-react'],
+        },
+    },
     ]
   },
-  devtool: 'source-map',
+  devtool: '#inline-source-map',
 };
