@@ -3,6 +3,11 @@ import { YT_REGEX, VID_PL_REGEX } from "../constants";
 import { vidOrPL } from "../util";
 
 // chrome.storage.sync.clear(() => console.log("cleared"));
+// chrome.contextMenus.create({
+//   title: "You seein this?",
+//   contexts: ["all"],
+//   onclick: () => alert('hi')
+// });
 
 chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   const tabId = sender.tab.id,
@@ -76,6 +81,68 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
   }
 });
 
+chrome.contextMenus.create({
+  "title": "Add Playlist",
+  "contexts": ["page"],
+  "id": "plPage",
+  "documentUrlPatterns": ["https://www.youtube.com/playlist*", "https://www.youtube.com/watch*list=*"]
+});
+chrome.contextMenus.create({
+  "title": "Add Video",
+  "contexts": ["page"],
+  "id": "videoPage",
+  "documentUrlPatterns": ["https://www.youtube.com/watch*"]
+});
+chrome.contextMenus.create({
+  "title": "Add Video",
+  "contexts": ["link"],
+  "id": "videoLink",
+  "targetUrlPatterns": ["https://www.youtube.com/watch*"]
+});
+chrome.contextMenus.create({
+  "title": "Add Playlist",
+  "contexts": ["link"],
+  "id": "plLink",
+  "targetUrlPatterns": ["https://www.youtube.com/playlist*", "https://www.youtube.com/watch*list=*"]
+});
+
+chrome.contextMenus.onClicked.addListener(addVidOrPl);
+
+function addVidOrPl(e, tab) {
+  let url = e.linkUrl || e.pageUrl;
+  getStorage('settings', data => {
+    let { allowedVideos, allowedPlaylists } = data.settings;
+    
+    const { isPL, PlID, isVid, vidID } = vidOrPL(url);
+
+    if (isPL && !allowedPlaylists.includes(PlID)) {
+      allowedPlaylists = allowedPlaylists.concat(PlID);
+    }
+    if (!isPL && isVid && !allowedVideos.includes(vidID)) {
+      allowedVideos = allowedVideos.concat(vidID);
+    }
+    if (isPL || isVid) {
+      const settings = Object.assign({}, data.settings, { allowedVideos, allowedPlaylists });
+      chrome.storage.sync.set({ settings });
+      // !e.linkUrl implies that you are on the page for the vid or pl you are adding so info can be grabbed
+
+      // if I want to get video and playlist titles when the link clicked is the way the video was added then I need to do a deep dive on the content page and it could be a pain.
+      let action;
+      if (!e.linkUrl) {
+        if (isPL && isVid) {
+          action = 'gatherPLInfo2';
+        } else {
+          action = isPL ? 'gatherPLInfo' : 'gatherVideoInfo';
+        }
+        chrome.tabs.sendMessage(tab.id, { action });
+      } else {
+        action = "getTitle";
+        chrome.tabs.sendMessage(tab.id, { action, targetUrl: url });
+      }
+    }
+  });
+}
+
 chrome.tabs.query({}, function(tabs) {
   const regex = /https:\/\/www.youtube.com\/*/;
   const ytTabs = Array.from(tabs)
@@ -114,7 +181,6 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
       chrome.pageAction.show(tabId);
     } else {
       chrome.pageAction.hide(tabId);
-
     }
     
     const videoRegex = /https:\/\/www.youtube.com\/watch*/;
@@ -129,8 +195,7 @@ chrome.tabs.onUpdated.addListener(function(tabId, changeInfo) {
       if (data.settings.enableContentBlocking) {
         blockContent(tabId, changeInfo.url, data.settings.allowedVideos, data.settings.allowedPlaylists);
       }
-  });
-
+    });
   }
 });
 

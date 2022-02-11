@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "youtube-focus",
-  "version": "1.0",
+  "version": "0.0.0.1",
   "description": "An extension to help keep you from wasting time on youtube",
   "page_action": {
     "default_popup": "popup/popup.html"
@@ -13,7 +13,8 @@
 
   "web_accessible_resources": [
     "not_available/not_available.html",
-    "getVideoInfo.js"
+    "getVideoInfo.js",
+    "favicon.ico"
   ],
 
   "content_scripts": [
@@ -29,7 +30,18 @@
   "permissions": [
     "storage",
     "webNavigation",
-    "tabs"
-  ]
+    "tabs",
+    "contextMenus"
+  ],
+  "icons": {
+    "16": "focus16.png",
+    "48": "focus48.png",
+    "128": "focus128.png"
+  },
+  "default_icon": {
+    "16": "focus16.png",
+    "32": "focus48.png",
+    "128": "focus128.png"
+  }
 
 }

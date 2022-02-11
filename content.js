@@ -1,6 +1,5 @@
 chrome.runtime.sendMessage({ action: 'showPageAction' });
 chrome.runtime.sendMessage({ action: 'getState' });
-
 chrome.runtime.onMessage.addListener(data => {
     switch(data.action) {
       case 'hideField': {
@@ -36,6 +35,10 @@ chrome.runtime.onMessage.addListener(data => {
       }
       case 'gatherPLInfo2': {
         sendPL2info();
+        break;
+      }
+      case 'getTitle': {
+        sendTitle(data.targetUrl);
         break;
       }
     }
@@ -81,13 +84,13 @@ function gatherVideoInfo() {
     return null;
   }
   const title = titleNode.innerText;
-  const viewsLong = document.querySelector('#info #count .view-count.style-scope.yt-view-count-renderer').innerText;
-  const viewsShort = document.querySelector('#info #count .short-view-count.style-scope.yt-view-count-renderer').innerText;
+  const viewsLong = document.querySelector('#info #count .view-count.style-scope.yt-view-count-renderer')?.innerText;
+  const viewsShort = document.querySelector('#info #count .short-view-count.style-scope.yt-view-count-renderer')?.innerText;
   const channel = ""//document.querySelector('#upload-info #owner-container .yt-simple-endpoint.style-scope.yt-formatted-string').innerText;
-  const publishDate = document.querySelector('#upload-info .date.style-scope.ytd-video-secondary-info-renderer').innerText;
+  const publishDate = document.querySelector('#upload-info .date.style-scope.ytd-video-secondary-info-renderer')?.innerText;
   let duration = null;
   if (!document.querySelector('#ytd-player .ad-interrupting')) {
-    duration = document.querySelector('.ytp-chrome-controls .ytp-time-display .ytp-time-duration').innerText;
+    duration = document.querySelector('.ytp-chrome-controls .ytp-time-display .ytp-time-duration')?.innerText;
   }
   return { title, viewsLong, viewsShort, channel, publishDate, duration };
 }
@@ -163,4 +166,33 @@ function retrieveVideoInfo() {
   }, 100);
 }
 
-// retrieveVideoInfo();
+function sendTitle(url) {
+  console.log("content, sent title");
+  
+  let links = Array.from(document.querySelectorAll('a'));
+  let targetLink = links.filter(link => (
+    link.href === url
+  ))[0];
+  const videoElem = targetLink.closest("ytd-video-renderer") || targetLink.closest("ytd-compact-video-renderer");
+  const playlistElem = targetLink.closest("ytd-playlist-renderer") || targetLink.closest("ytd-compact-playlist-renderer") || targetLink.closest("ytd-radio-renderer") || targetLink.closest("ytd-compact-radio-renderer");
+  let title, duration, type, plName;
+  if (videoElem) {
+    title = videoElem.querySelector("#video-title")?.innerText;
+    duration = videoElem.querySelector("#overlays span.ytd-thumbnail-overlay-time-status-renderer")?.innerText;
+    type = "receiveVideo"
+    // can get is live boolean
+  } else if (playlistElem) {
+    plName = playlistElem.querySelector("#video-title")?.innerText;
+    type = "receivePL"
+    // pl can potentially get first video id to use as image
+  }
+  
+  if (title || plName) {
+    const info = title ? { title } : { plName };
+    if (duration) {
+      info.duration = duration;
+    }
+    chrome.runtime.sendMessage({ action: 'receiveStorageInfo', type, info, url });
+  }
+  // if I ever get to the point where I want to find why things error out I can add the current url of the page and this link url so that I can try to dig and find out what failed.
+}
