@@ -1,5 +1,7 @@
 chrome.runtime.sendMessage({ action: 'showPageAction' });
 chrome.runtime.sendMessage({ action: 'getState' });
+
+const intervals = {};
 chrome.runtime.onMessage.addListener(data => {
     switch(data.action) {
       case 'hideField': {
@@ -40,6 +42,15 @@ chrome.runtime.onMessage.addListener(data => {
       case 'getTitle': {
         sendTitle(data.targetUrl);
         break;
+      }
+      case 'continuousClick': {
+        let interval;
+        if (data.value.makeClick) {
+          interval = setInterval(() => document.querySelector(data.value.element)?.click(), data.value.timer);
+          intervals[data.value.element] = interval;
+        } else {
+          clearInterval(intervals[data.value.element]);
+        }
       }
     }
 });

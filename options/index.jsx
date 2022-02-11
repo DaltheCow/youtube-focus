@@ -7,7 +7,7 @@ import { useStorageContext, StorageProvider } from '../contexts/storage.context.
 const App = () => {
   const { dataStorage, isLoaded, toggleField, deleteLink } = useStorageContext();
   
-    const { allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = dataStorage;
+    const { allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking, disableAutoplay } = dataStorage;
     return (
       <div>
         { isLoaded && <div className="main-content">
@@ -18,6 +18,15 @@ const App = () => {
                 <div className="switch-show">SHOW</div>
                 <div onClick={ () => toggleField('hideRelated') } className={`switcher_slider${hideRelated ? " checked" : ""}`}></div>
                 <div className="switch-hide">HIDE</div>
+              </div>
+            </div>
+
+            <div className="switch-container">
+              Autoplay:
+              <div className="switch">
+                <div className="switch-show">ON</div>
+                <div onClick={ () => toggleField('disableAutoplay') } className={`switcher_slider${disableAutoplay ? " checked" : ""}`}></div>
+                <div className="switch-hide">OFF</div>
               </div>
             </div>
 

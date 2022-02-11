@@ -1,5 +1,5 @@
 import { getStorage, setStorage, getStorageAll } from "../modules/storage";
-import { YT_REGEX, VID_PL_REGEX } from "../constants";
+import { YT_REGEX, AUTOPLAY_CANCEL_ELEMENT } from "../constants";
 import { vidOrPL } from "../util";
 
 // chrome.storage.sync.clear(() => console.log("cleared"));
@@ -37,8 +37,12 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         }
         updateStorageInfoMsg(tabId, url, data.settings.allowedVideos, data.settings.allowedPlaylists);
         ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
-          sendStateToContent(data.settings[field], field, tabId);
+          sendStateToContent('hideField', data.settings[field], field, tabId);
         });
+        ['disableAutoplay'].forEach(field => {
+          const properties = { element: AUTOPLAY_CANCEL_ELEMENT, makeClick: data.settings[field], timer: 1000 };
+          sendStateToContent('continuousClick', properties, undefined, tabId);
+        })
       });
       break;
     }
@@ -167,7 +171,11 @@ chrome.tabs.query({}, function(tabs) {
         });
       }
       ['hideRelated', 'hideComments', 'hideEndScreen'].forEach(field => {
-        sendStateToContent(newData.settings[field], field);
+        sendStateToContent("hideField", newData.settings[field], field);
+      });
+      ['disableAutoplay'].forEach(field => {
+        const properties = { element: AUTOPLAY_CANCEL_ELEMENT, makeClick: data.settings[field], timer: 1000 };
+        sendStateToContent('continuousClick', properties);
       });
     });
   });
@@ -211,7 +219,8 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
         allowedPlaylists: oAllowedPlaylists,
         hideEndScreen: oHideEndScreen,
         hideRelated: oHideRelated,
-        hideComments: oHideComments
+        hideComments: oHideComments,
+        disableAutoplay: oDisableAutoplay
       } = oldValue;
       const {
         enableContentBlocking: nEnableContentBlocking,
@@ -219,18 +228,23 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
         allowedPlaylists: nAllowedPlaylists,
         hideEndScreen: nHideEndScreen,
         hideRelated: nHideRelated,
-        hideComments: nHideComments
+        hideComments: nHideComments,
+        disableAutoplay: nDisableAutoplay,
       } = newValue;
       const blockEnabled = !oEnableContentBlocking && nEnableContentBlocking,
             vidRemoved = oAllowedVideos.length > nAllowedVideos.length,
             plRemoved = oAllowedPlaylists.length > nAllowedPlaylists.length,
             blockVids = (blockEnabled) || (nEnableContentBlocking && (vidRemoved || plRemoved));
       if (oHideRelated !== nHideRelated) {
-        sendStateToContent(nHideRelated, 'hideRelated');
+        sendStateToContent("hideField", nHideRelated, 'hideRelated');
       } else if (oHideComments !== nHideComments) {
-        sendStateToContent(nHideComments, 'hideComments');
+        sendStateToContent("hideField", nHideComments, 'hideComments');
       } else if (oHideEndScreen !== nHideEndScreen) {
-        sendStateToContent(nHideEndScreen, 'hideEndScreen');
+        sendStateToContent("hideField", nHideEndScreen, 'hideEndScreen');
+      } else if (oDisableAutoplay !== nDisableAutoplay) {
+        
+        const properties = { element: AUTOPLAY_CANCEL_ELEMENT, makeClick: data.settings[field], timer: 1000 };
+        sendStateToContent('continuousClick', properties);
       } else if (blockVids) {
         chrome.tabs.query({}, function(tabs) {
           Array.from(tabs).filter(tab => YT_REGEX.test(tab.url)).forEach(tab => {
@@ -252,12 +266,13 @@ function ensureSettings(data, callback) {
   hideRelated = Boolean(hideRelated);
   hideComments = Boolean(hideComments);
   hideEndScreen = Boolean(hideEndScreen);
+  disableAutoplay = Boolean(disableAutoplay);
   enableContentBlocking = Boolean(enableContentBlocking);
   allowedVideos = allowedVideos === undefined ? [] : allowedVideos;
   allowedPlaylists = allowedPlaylists === undefined ? [] : allowedPlaylists;
   videoStorage = videoStorage === undefined ? {} : videoStorage;
   plStorage = plStorage === undefined ? {} : plStorage;
-  const settings = { hideRelated, hideComments, hideEndScreen, enableContentBlocking, allowedVideos, allowedPlaylists };
+  const settings = { hideRelated, hideComments, hideEndScreen, disableAutoplay, enableContentBlocking, allowedVideos, allowedPlaylists };
   //update storage use to new set function
   let newData = {};
   setStorage('settings', { settings }).then(data => {
@@ -299,8 +314,8 @@ function logToContent(text) {
   });
 }
 
-function sendStateToContent(value, field, tabId) {
-  var message = { action: 'hideField', value, field };
+function sendStateToContent(action, value, field, tabId) {
+  var message = { action, value, field };
   if (tabId) {
     chrome.tabs.sendMessage(tabId, message);
   }

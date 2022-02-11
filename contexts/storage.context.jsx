@@ -12,8 +12,8 @@ export const StorageProvider = ({children}) => {
         getStorageAll(['settings', 'videoStorage', 'plStorage'])
             .then(data => {
             const { settings, videoStorage, plStorage } = data;
-            const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, enableContentBlocking } = settings;
-            setDataStorage({ allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking });
+            const { allowedVideos, allowedPlaylists, hideRelated, hideComments, hideEndScreen, disableAutoplay, enableContentBlocking } = settings;
+            setDataStorage({ allowedVideos, allowedPlaylists, videoStorage, plStorage, hideRelated, hideComments, hideEndScreen, enableContentBlocking, disableAutoplay });
             setIsLoaded(true);
             });
     },[]);
@@ -22,7 +22,7 @@ export const StorageProvider = ({children}) => {
         const listenerFunc = (changes, namespace) => {
             if (changes['settings']) {
                 const { oldValue, newValue } = changes.settings;
-                const fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'enableContentBlocking', 'allowedVideos', 'allowedPlaylists'];
+                const fields = ['hideRelated', 'hideComments', 'hideEndScreen', 'enableContentBlocking', 'allowedVideos', 'allowedPlaylists', 'disableAutoplay'];
                 while (JSON.stringify(oldValue[fields[0]]) === JSON.stringify(newValue[fields[0]])) {
                 fields.shift();
                 }
